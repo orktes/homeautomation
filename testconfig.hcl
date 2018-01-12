@@ -13,16 +13,16 @@ adapter "dra" {
     }
 }
 
-trigger "test" {
+trigger "toggle_all_light_on" {
     key = "deconz.sensors.10.buttonevent"
     value = 5002
     target = "deconz.groups.1.on"
     target_value = false
 }
 
-trigger "test2" {
+trigger "toggle_denon_on" {
     key = "deconz.sensors.10.buttonevent"
     value = 4002
-    target = "deconz.lights.7.on"
+    target = "dra.on"
     target_value = false
 }
