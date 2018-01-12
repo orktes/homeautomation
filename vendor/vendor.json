@@ -63,10 +63,10 @@
 			"revisionTime": "2017-10-17T18:19:29Z"
 		},
 		{
-			"checksumSHA1": "avGCYx9IKa86Q/H3KQLjVC2jn7k=",
+			"checksumSHA1": "ZOdd0IWlnB84LDFv/Um1EdS8mhw=",
 			"path": "github.com/orktes/go-dra",
-			"revision": "534416ba93cc099b4205f03576bc573e09f781da",
-			"revisionTime": "2018-01-11T13:15:27Z"
+			"revision": "9577fde8e0a98a475e9ad0e8fffe9455694c0850",
+			"revisionTime": "2018-01-12T20:22:55Z"
 		}
 	],
 	"rootPath": "github.com/orktes/homeautomation"

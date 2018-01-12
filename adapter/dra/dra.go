@@ -79,6 +79,8 @@ func (dra *DRA) Get(id string) (interface{}, error) {
 		return dra.DRA.GetMute(), nil
 	case "power":
 		return dra.DRA.GetPower(), nil
+	case "input":
+		return dra.DRA.GetInput(), nil
 	}
 
 	return nil, nil
@@ -105,6 +107,10 @@ func (dra *DRA) Set(id string, val interface{}) error {
 		if boolval, ok := val.(bool); ok {
 			return dra.DRA.SetPower(boolval)
 		}
+	case "input":
+		if strval, ok := val.(string); ok {
+			return dra.DRA.SetInput(strval)
+		}
 	}
 	return nil
 }
@@ -112,7 +118,7 @@ func (dra *DRA) Set(id string, val interface{}) error {
 func (dra *DRA) GetAll() (map[string]interface{}, error) {
 	vals := map[string]interface{}{}
 
-	for _, key := range []string{"master_volume", "mute", "power"} {
+	for _, key := range []string{"master_volume", "mute", "power", "input"} {
 		val, err := dra.Get(key)
 		if err != nil {
 			return nil, err

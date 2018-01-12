@@ -67,6 +67,16 @@ func (dra *DRA) Send(cmd ...string) error {
 	return w.Flush()
 }
 
+// SetInput sets DRA input
+func (dra *DRA) SetInput(input string) error {
+	return dra.Send("SI", input)
+}
+
+// GetInput returns current input
+func (dra *DRA) GetInput() string {
+	return dra.system.input
+}
+
 // SetMasterVolume sets DRA master volume value should be between 0 - 91
 func (dra *DRA) SetMasterVolume(value int) error {
 	return dra.Send("MV", fmt.Sprintf("%d", value))
