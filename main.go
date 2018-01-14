@@ -15,6 +15,9 @@ import (
 	_ "github.com/orktes/homeautomation/adapter/deconz"
 	_ "github.com/orktes/homeautomation/adapter/dra"
 	_ "github.com/orktes/homeautomation/adapter/viera"
+
+	// Frontends
+	_ "github.com/orktes/homeautomation/frontend/ssh"
 )
 
 func main() {
@@ -30,7 +33,7 @@ func main() {
 
 	h := hub.New()
 	for _, adapterConfig := range conf.Adapters {
-		ad, err := registry.Create(adapterConfig, h)
+		ad, err := registry.CreateAdapter(adapterConfig, h)
 		if err != nil {
 			fmt.Printf("Could not init %s (%s)\n", adapterConfig.ID, adapterConfig.Type)
 			panic(err)
@@ -46,6 +49,14 @@ func main() {
 		h.CreateTrigger(trigger)
 	}
 
+	for _, frontendConf := range conf.Frontends {
+		_, err := registry.CreateFrontend(frontendConf, h)
+		if err != nil {
+			fmt.Printf("Could not init %s (%s)\n", frontendConf.ID, frontendConf.Type)
+			panic(err)
+		}
+	}
+
 	fmt.Printf("Configuration done!\n")
 
 	go func() {
@@ -56,15 +67,6 @@ func main() {
 			}
 		}
 	}()
-
-	val, err := h.RunScript(`
-		lights[1].name
-	`)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("%+v\n", val)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)

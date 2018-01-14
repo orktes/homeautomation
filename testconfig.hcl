@@ -1,3 +1,11 @@
+frontend "ssh" {
+    type = "ssh"
+    config {
+        addr = ":2222"
+        password = "password"
+    }
+}
+
 adapter "deconz" {
     type = "deconz"
     config {

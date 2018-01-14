@@ -168,5 +168,5 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 }
 
 func init() {
-	registry.Register("dra", Create)
+	registry.RegisterAdapter("dra", Create)
 }

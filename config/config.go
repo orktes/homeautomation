@@ -16,7 +16,8 @@ type Adapter struct {
 
 // Frontend represents a single frontend config
 type Frontend struct {
-	Type   string                 `hcl:"type,key"`
+	ID     string                 `hcl:"id,key"`
+	Type   string                 `hcl:"type"`
 	Config map[string]interface{} `hcl:"config"`
 }
 
