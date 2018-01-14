@@ -16,6 +16,7 @@ import (
 
 type Hub struct {
 	adapters       map[string]adapter.Adapter
+	lights         map[string]*Light
 	updateChannels []chan adapter.Update
 
 	jsRuntime *jsRuntime
@@ -26,6 +27,7 @@ type Hub struct {
 func New() *Hub {
 	hub := &Hub{
 		adapters:  map[string]adapter.Adapter{},
+		lights:    map[string]*Light{},
 		jsRuntime: newJSRuntime(),
 	}
 
@@ -65,7 +67,18 @@ func (hub *Hub) Get(id string) (interface{}, error) {
 	defer hub.Unlock()
 
 	parts := util.SplitID(id)
-	c, ok := hub.adapters[parts[0]]
+	root := parts[0]
+
+	var c adapter.ValueContainer
+	var ok bool
+	switch root {
+	case "lights":
+		// TODO only create once
+		c, ok = lightsValueContainer(hub.lights), true
+	default:
+		c, ok = hub.adapters[root]
+	}
+
 	if !ok {
 		return nil, errors.New("Not found")
 	}
@@ -96,7 +109,11 @@ func (hub *Hub) GetAll() (map[string]interface{}, error) {
 	hub.Lock()
 	defer hub.Unlock()
 
-	nodes := map[string]interface{}{}
+	nodes := map[string]interface{}{
+		// TODO check if lightsValueContainer needs hub mutex
+		// TODO only create lightsValueContainer one
+		"lights": lightsValueContainer(hub.lights),
+	}
 
 	for key, ad := range hub.adapters {
 		nodes[key] = ad
@@ -117,6 +134,33 @@ func (hub *Hub) AddAdapter(id string, ad adapter.Adapter) {
 			hub.sendUpdate(u)
 		}
 	}()
+}
+
+func (hub *Hub) CreateLight(lightConfig config.Light) *Light {
+	hub.Lock()
+	defer hub.Unlock()
+
+	id := fmt.Sprintf("%d", len(hub.lights)+1)
+
+	light := &Light{id: id, hub: hub, conf: lightConfig}
+	light.init()
+
+	hub.lights[id] = light
+
+	return light
+}
+
+func (hub *Hub) GetLights() []*Light {
+	hub.Lock()
+	defer hub.Unlock()
+
+	lights := make([]*Light, 0, len(hub.lights))
+
+	for _, light := range hub.lights {
+		lights = append(lights, light)
+	}
+
+	return lights
 }
 
 func (hub *Hub) CreateTrigger(trigger config.Trigger) {

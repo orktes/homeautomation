@@ -36,3 +36,14 @@ trigger "denon_volume_down" {
     action = "dra.master_volume = 'DOWN'"
     interval = 100
 }
+
+light "Livingroom" {
+    read {
+        bri = "deconz.groups.1.bri"
+        on = "deconz.groups.1.any_on"
+    }
+    write {
+        bri = "deconz.groups.1.bri"
+        on = "deconz.groups.1.on"
+    }
+}

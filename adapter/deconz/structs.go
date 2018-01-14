@@ -82,5 +82,6 @@ type sensorState struct {
 }
 
 type sensor struct {
+	Name  string      `json:"name"`
 	State sensorState `json:"state"`
 }

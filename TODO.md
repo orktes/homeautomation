@@ -1,0 +1,2 @@
+- Move hub.lights to adapters
+- Add triggers to adapters

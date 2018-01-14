@@ -20,10 +20,17 @@ type Frontend struct {
 	Config map[string]interface{} `hcl:"config"`
 }
 
+// LightState represent configurable values in a light
+type LightState struct {
+	Brightness string `hcl:"bri"`
+	On         string `hcl:"on"`
+}
+
 // Light represents a single light (or a virtual light) config
 type Light struct {
-	Name   string `hcl:"name,key"`
-	Source string `hcl:"source"`
+	Name  string     `hcl:"name,key"`
+	Read  LightState `hcl:"read"`
+	Write LightState `hcl:"write"`
 }
 
 // Amplifier represent a single amplifier

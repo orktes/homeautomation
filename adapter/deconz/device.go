@@ -24,11 +24,16 @@ func (ld *lightDevice) UpdateChannel() <-chan adapter.Update {
 }
 
 func (ld *lightDevice) Get(id string) (interface{}, error) {
+	if id == "name" {
+		return ld.data.Name, nil
+	}
 	return getStructValueByName(ld.data.State, id), nil
 }
 
 func (ld *lightDevice) GetAll() (map[string]interface{}, error) {
-	return getAllFromStruct(ld.data.State, ld), nil
+	all := getAllFromStruct(ld.data.State, ld)
+	all["name"] = ld.data.Name
+	return all, nil
 }
 
 func (ld *lightDevice) Set(id string, val interface{}) error {
@@ -70,8 +75,12 @@ func (gd *groupDevice) UpdateChannel() <-chan adapter.Update {
 }
 
 func (gd *groupDevice) Get(id string) (interface{}, error) {
-	if id == "any_on" {
+
+	switch id {
+	case "any_on":
 		return *gd.data.State.AnyOn, nil
+	case "name":
+		return gd.data.Name, nil
 	}
 
 	return getStructValueByName(gd.data.Action, id), nil
@@ -79,7 +88,8 @@ func (gd *groupDevice) Get(id string) (interface{}, error) {
 
 func (gd *groupDevice) GetAll() (map[string]interface{}, error) {
 	vals := getAllFromStruct(gd.data.Action, gd)
-	vals["any_on"] = gd.data.State.AnyOn
+	vals["any_on"] = *gd.data.State.AnyOn
+	vals["name"] = gd.data.Name
 	return vals, nil
 }
 
@@ -122,11 +132,16 @@ func (sd *sensorDevice) UpdateChannel() <-chan adapter.Update {
 }
 
 func (sd *sensorDevice) Get(id string) (interface{}, error) {
+	if id == "name" {
+		return sd.data.Name, nil
+	}
 	return getStructValueByName(sd.data.State, id), nil
 }
 
 func (sd *sensorDevice) GetAll() (map[string]interface{}, error) {
-	return getAllFromStruct(sd.data.State, sd), nil
+	all := getAllFromStruct(sd.data.State, sd)
+	all["name"] = sd.data.Name
+	return all, nil
 }
 
 func (sd *sensorDevice) Set(id string, val interface{}) error {

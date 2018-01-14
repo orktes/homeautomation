@@ -38,6 +38,10 @@ func main() {
 		h.AddAdapter(adapterConfig.ID, ad)
 	}
 
+	for _, lightConfig := range conf.Lights {
+		h.CreateLight(lightConfig)
+	}
+
 	for _, trigger := range conf.Trigger {
 		h.CreateTrigger(trigger)
 	}
@@ -53,16 +57,14 @@ func main() {
 		}
 	}()
 
-	/*
-		val, err := h.RunScript(`
-			tv[1].power = on
-		`)
-		if err != nil {
-			panic(err)
-		}
+	val, err := h.RunScript(`
+		lights[1].name
+	`)
+	if err != nil {
+		panic(err)
+	}
 
-		fmt.Printf("%+v\n", val)
-	*/
+	fmt.Printf("%+v\n", val)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
