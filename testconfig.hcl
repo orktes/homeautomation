@@ -2,7 +2,7 @@ frontend "ssh" {
     type = "ssh"
     config {
         addr = ":2222"
-        password = "password"
+        password = "jaakonkoti"
     }
 }
 

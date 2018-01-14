@@ -8,8 +8,8 @@ import (
 
 	"github.com/orktes/homeautomation/adapter"
 	"github.com/orktes/homeautomation/util"
+	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/chzyer/readline"
 	"github.com/gliderlabs/ssh"
 	"github.com/orktes/homeautomation/frontend"
 	"github.com/orktes/homeautomation/hub"
@@ -37,28 +37,13 @@ func (sshf *SSHFrontend) init() {
 
 func (sshf *SSHFrontend) handler(s ssh.Session) {
 
-	l, err := readline.NewEx(&readline.Config{
-		Prompt:      "\033[31m»\033[0m ",
-		Stdin:       s,
-		Stderr:      s.Stderr(),
-		Stdout:      s,
-		StdinWriter: s,
-	})
-	if err != nil {
-		return
-	}
+	terminal := terminal.NewTerminal(s, "\033[31m»\033[0m ")
 
 	lastLine := "hub"
 
 	for {
-		line, err := l.Readline()
-		if err == readline.ErrInterrupt {
-			if len(line) == 0 {
-				break
-			} else {
-				continue
-			}
-		} else if err == io.EOF {
+		line, err := terminal.ReadLine()
+		if err == io.EOF {
 			break
 		}
 
@@ -84,8 +69,8 @@ func (sshf *SSHFrontend) handler(s ssh.Session) {
 
 		val, err := sshf.hub.RunScript(line)
 		if err != nil {
-			l.Write([]byte(err.Error()))
-			l.Write([]byte("\n"))
+			terminal.Write([]byte(err.Error()))
+			terminal.Write([]byte("\n"))
 			continue
 		}
 
@@ -101,17 +86,17 @@ func (sshf *SSHFrontend) handler(s ssh.Session) {
 					case adapter.ValueContainer:
 						iterate(item, prefix+"."+key)
 					default:
-						l.Write([]byte(prefix))
-						l.Write([]byte("."))
-						l.Write([]byte(key))
-						l.Write([]byte(" = "))
-						json.NewEncoder(l).Encode(item)
+						terminal.Write([]byte(prefix))
+						terminal.Write([]byte("."))
+						terminal.Write([]byte(key))
+						terminal.Write([]byte(" = "))
+						json.NewEncoder(terminal).Encode(item)
 					}
 				}
 			}
 			iterate(vc, "")
 		} else {
-			json.NewEncoder(l).Encode(val)
+			json.NewEncoder(terminal).Encode(val)
 		}
 	}
 }

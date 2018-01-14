@@ -9,12 +9,6 @@
 			"revisionTime": "2016-10-02T11:37:05Z"
 		},
 		{
-			"checksumSHA1": "0QZlv9eOOsNXjJsKtVRHw+B1+Ik=",
-			"path": "github.com/chzyer/readline",
-			"revision": "f6d7a1f6fbf35bbf9beb80dc63c56a29dcfb759f",
-			"revisionTime": "2017-12-08T01:17:16Z"
-		},
-		{
 			"checksumSHA1": "6y/Ht8J58EotTDBEIuE3+s4AnL8=",
 			"path": "github.com/dlclark/regexp2",
 			"revision": "7632a260cbaf5e7594fc1544a503456ecd0827f1",
@@ -213,6 +207,12 @@
 			"revisionTime": "2017-11-22T09:46:40Z"
 		},
 		{
+			"checksumSHA1": "X1NTlfcau2XcV6WtAHF6b/DECOA=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "13931e22f9e72ea58bb73048bc752b48c6d4d4ac",
+			"revisionTime": "2018-01-11T11:10:38Z"
+		},
+		{
 			"checksumSHA1": "9Pcc1IiRqPxEcxU2KMpkrcEGb3k=",
 			"path": "golang.org/x/net/bpf",
 			"revision": "5602c733f70afc6dcec6766be0d5034d4c4f14de",
@@ -259,6 +259,12 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "f3918c30c5c2cb527c0b071a27c35120a6c0719a",
 			"revisionTime": "2017-04-05T16:58:12Z"
+		},
+		{
+			"checksumSHA1": "eQq+ZoTWPjyizS9XalhZwfGjQao=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "810d7000345868fc619eb81f46307107118f4ae1",
+			"revisionTime": "2018-01-09T14:25:55Z"
 		},
 		{
 			"checksumSHA1": "O/wbuH8Lr2At3en/DY4xuCUmV3g=",
