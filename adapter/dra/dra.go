@@ -8,9 +8,8 @@ import (
 	denondra "github.com/orktes/go-dra"
 	"github.com/orktes/homeautomation/adapter"
 	"github.com/orktes/homeautomation/hub"
+	"github.com/orktes/homeautomation/registry"
 )
-
-var instances = map[string]*DRA{}
 
 type DRA struct {
 	id   string
@@ -54,6 +53,16 @@ start:
 					},
 				},
 			})
+		case strings.HasPrefix(u, "SI"):
+			dra.SendUpdate(adapter.Update{
+				ValueContainer: dra,
+				Updates: []adapter.ValueUpdate{
+					adapter.ValueUpdate{
+						Key:   dra.id + ".input",
+						Value: dra.GetInput(),
+					},
+				},
+			})
 		case strings.HasPrefix(u, "PW"):
 			dra.SendUpdate(adapter.Update{
 				ValueContainer: dra,
@@ -71,7 +80,15 @@ start:
 	goto start
 }
 
+func (dra *DRA) ID() string {
+	return dra.id
+}
+
 func (dra *DRA) Get(id string) (interface{}, error) {
+	if dra.DRA == nil {
+		return nil, nil
+	}
+
 	switch id {
 	case "master_volume":
 		return dra.DRA.GetMasterVolume(), nil
@@ -87,6 +104,10 @@ func (dra *DRA) Get(id string) (interface{}, error) {
 }
 
 func (dra *DRA) Set(id string, val interface{}) error {
+	if dra.DRA == nil {
+		return nil
+	}
+
 	switch id {
 	case "master_volume":
 		if intval, ok := val.(int); ok {
@@ -133,12 +154,8 @@ func (dra *DRA) UpdateChannel() <-chan adapter.Update {
 	return dra.Updater.UpdateChannel()
 }
 
-// Create returns a new Deconz instance
+// Create returns a new denon dra instance
 func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
-	if dra, ok := instances[id]; ok {
-		return dra, nil
-	}
-
 	dra := &DRA{
 		id:   id,
 		addr: config["address"].(string),
@@ -146,8 +163,10 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 
 	go dra.connect()
 
-	instances[id] = dra
-
 	return dra, nil
 
+}
+
+func init() {
+	registry.Register("dra", Create)
 }

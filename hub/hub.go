@@ -3,6 +3,7 @@ package hub
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"sync"
@@ -10,18 +11,44 @@ import (
 
 	"github.com/orktes/homeautomation/adapter"
 	"github.com/orktes/homeautomation/config"
+	"github.com/orktes/homeautomation/util"
 )
 
 type Hub struct {
 	adapters       map[string]adapter.Adapter
 	updateChannels []chan adapter.Update
 
+	jsRuntime *jsRuntime
+
 	sync.Mutex
 }
 
 func New() *Hub {
-	hub := &Hub{adapters: map[string]adapter.Adapter{}}
+	hub := &Hub{
+		adapters:  map[string]adapter.Adapter{},
+		jsRuntime: newJSRuntime(),
+	}
+
+	hub.jsRuntime.Set("hub", &objectLikeValueContainer{hub})
+	hub.jsRuntime.Set("on", true)
+	hub.jsRuntime.Set("off", true)
+
 	return hub
+}
+
+func (hub *Hub) RunScript(src string) (interface{}, error) {
+	v, err := hub.jsRuntime.RunString(fmt.Sprintf("with(hub) {%s}", src))
+	if err != nil {
+		return nil, err
+	}
+
+	val := v.Export()
+
+	if olcv, ok := val.(*objectLikeValueContainer); ok {
+		val = olcv.ValueContainer
+	}
+
+	return val, nil
 }
 
 func (hub *Hub) UpdateChannel() <-chan adapter.Update {
@@ -37,7 +64,7 @@ func (hub *Hub) Get(id string) (interface{}, error) {
 	hub.Lock()
 	defer hub.Unlock()
 
-	parts := strings.Split(id, ".")
+	parts := util.SplitID(id)
 	c, ok := hub.adapters[parts[0]]
 	if !ok {
 		return nil, errors.New("Not found")
@@ -51,7 +78,7 @@ func (hub *Hub) Get(id string) (interface{}, error) {
 }
 
 func (hub *Hub) Set(id string, val interface{}) error {
-	parts := strings.Split(id, ".")
+	parts := util.SplitID(id)
 	c, err := hub.Get(parts[0])
 	if err != nil {
 		return err
@@ -83,6 +110,7 @@ func (hub *Hub) AddAdapter(id string, ad adapter.Adapter) {
 	defer hub.Unlock()
 
 	hub.adapters[id] = ad
+
 	go func() {
 		ch := ad.UpdateChannel()
 		for u := range ch {
@@ -93,29 +121,75 @@ func (hub *Hub) AddAdapter(id string, ad adapter.Adapter) {
 
 func (hub *Hub) CreateTrigger(trigger config.Trigger) {
 	go func() {
+		key := util.ConvertJSIDToDotID(trigger.Key)
 		ch := hub.UpdateChannel()
+
+		var stopInterval func()
+
+		action := func() {
+			time.Sleep(time.Duration(trigger.Delay) * time.Millisecond)
+			_, err := hub.RunScript(trigger.Action)
+			if err != nil {
+				log.Printf("Trigger:%s action returned an error: %s\n", trigger.Name, err.Error())
+			}
+		}
+
 		for u := range ch {
 			for _, kvpu := range u.Updates {
-				// TODO support intervalled triggers
-				if kvpu.Key == trigger.Key && kvpu.Value == trigger.Value {
-					go func(trigger config.Trigger) {
-						if trigger.Delay > 0 {
-							time.Sleep(time.Duration(trigger.Delay) * time.Millisecond)
+				if kvpu.Key == key {
+					cond, err := hub.RunScript(trigger.Condition)
+					if err != nil {
+						log.Printf("Error occured while executing trigger:%s condition: %s", trigger.Name, err.Error())
+						break
+					}
+
+					condBoolValue, ok := cond.(bool)
+					if !ok {
+						log.Printf("Trigger:%s end condition returned a non bool result %+v\n", trigger.Name, cond)
+						break
+					}
+
+					if condBoolValue {
+						if trigger.EndCondition == "" {
+							action()
+						} else {
+							if stopInterval != nil {
+								stopInterval()
+							}
+							if trigger.Interval == 0 {
+								log.Printf("Trigger:%s doesnt have an interval defined", trigger.Name)
+								break
+							}
+							action()
+							stopInterval = util.Interval(action, time.Duration(trigger.Interval)*time.Millisecond)
 						}
-						err := hub.Set(trigger.Target, trigger.TargetValue)
+					}
+
+					if trigger.EndCondition != "" {
+						cond, err := hub.RunScript(trigger.EndCondition)
 						if err != nil {
-							fmt.Printf("Error occured when setting %s = %+v : %s\n", trigger.Target, trigger.TargetValue, err.Error())
+							log.Printf("Error occured while executing trigger:%s condition: %s", trigger.Name, err.Error())
+							break
 						}
-					}(trigger)
+
+						condBoolValue, ok = cond.(bool)
+						if !ok {
+							log.Printf("Trigger:%s end condition returned a non bool result %+v\n", trigger.Name, cond)
+							break
+						}
+
+						if condBoolValue && stopInterval != nil {
+							stopInterval()
+							stopInterval = nil
+						}
+					}
+
 					break
 				}
+
 			}
 		}
 	}()
-}
-
-func (hub *Hub) GetSettingStore() *SettingsStore {
-	return &SettingsStore{}
 }
 
 func (hub *Hub) Close() error {

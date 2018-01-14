@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/orktes/homeautomation/adapter"
 	"github.com/orktes/homeautomation/hub"
+	"github.com/orktes/homeautomation/registry"
 )
 
 var (
@@ -215,7 +216,6 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 			return
 		}
 		ev := &event{}
-
 		err = json.Unmarshal(message, ev)
 		if err != nil {
 			fmt.Printf("Error occured while parsing event: %s", err.Error())
@@ -346,21 +346,17 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 
 	hostname, _ := config["hostname"].(string)
 	port, _ := config["port"].(int)
+	key, _ := config["key"].(string)
 
 	deconz := &Deconz{
 		id:       id,
 		hostname: hostname,
 		port:     port,
+		key:      key,
 
 		lights:  map[string]*lightDevice{},
 		groups:  map[string]*groupDevice{},
 		sensors: map[string]*sensorDevice{},
-	}
-
-	// TODO get id if available
-	key := hub.GetSettingStore().Get("deconz:" + id + ":key")
-	if key != nil {
-		deconz.key = key.(string)
 	}
 
 	deconz.init()
@@ -368,4 +364,8 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 	instances[id] = deconz
 
 	return deconz, nil
+}
+
+func init() {
+	registry.Register("deconz", Create)
 }

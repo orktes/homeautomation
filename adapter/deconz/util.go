@@ -40,8 +40,15 @@ func getStructValueByName(a interface{}, key string) interface{} {
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
+		valueField := v.Field(i)
 		if field.Tag.Get("json") == key {
-			return v.Field(i).Elem().Interface()
+			if valueField.Kind() == reflect.Ptr {
+				if valueField.IsNil() {
+					return nil
+				}
+				return valueField.Elem().Interface()
+			}
+			return valueField.Interface()
 		}
 	}
 
@@ -63,12 +70,24 @@ func mergeStructs(a interface{}, b interface{}) []updatedKey {
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		if !v.Field(i).IsNil() {
+		valueField := v.Field(i)
+		if !valueField.IsNil() {
+			var val interface{}
+			if valueField.Kind() == reflect.Ptr {
+				val = valueField.Elem().Interface()
+			} else {
+				val = valueField.Interface()
+			}
 			keys = append(keys, updatedKey{
 				key: field.Tag.Get("json"),
-				val: v.Field(i).Elem().Interface(),
+				val: val,
 			})
-			aV.Field(i).Elem().Set(v.Field(i).Elem())
+
+			if v.Field(i).Kind() == reflect.Ptr {
+				aV.Field(i).Elem().Set(v.Field(i).Elem())
+			} else {
+				aV.Field(1).Set(v.Field(1))
+			}
 		}
 	}
 

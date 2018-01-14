@@ -46,14 +46,13 @@ type Television struct {
 
 // Trigger trigger something
 type Trigger struct {
-	Name        string       `hcl:"name,key"`
-	Key         string       `hcl:"key"`
-	Value       interface{}  `hcl:"value"`
-	EndValue    *interface{} `hcl:"end_value"`
-	Target      string       `hcl:"target"`
-	TargetValue interface{}  `hcl:"target_value"`
-	Interval    int          `hcl:"interval"`
-	Delay       int          `hcl:"delay"`
+	Name         string `hcl:"name,key"`
+	Key          string `hcl:"key"`
+	Condition    string `hcl:"condition"`
+	EndCondition string `hcl:"end_condition"`
+	Action       string `hcl:"action"`
+	Interval     int    `hcl:"interval"`
+	Delay        int    `hcl:"delay"`
 }
 
 // Sensor defines a single sensor and the triggers for it

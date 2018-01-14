@@ -71,7 +71,7 @@ func (gd *groupDevice) UpdateChannel() <-chan adapter.Update {
 
 func (gd *groupDevice) Get(id string) (interface{}, error) {
 	if id == "any_on" {
-		return gd.data.State.AnyOn, nil
+		return *gd.data.State.AnyOn, nil
 	}
 
 	return getStructValueByName(gd.data.Action, id), nil

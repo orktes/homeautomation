@@ -3,6 +3,7 @@ adapter "deconz" {
     config {
         hostname = "10.0.1.22"
         port = 80
+        key = "5D7E8C715E"
     }
 }
 
@@ -13,16 +14,25 @@ adapter "dra" {
     }
 }
 
-trigger "toggle_all_light_on" {
-    key = "deconz.sensors.10.buttonevent"
-    value = 5002
-    target = "deconz.groups.1.on"
-    target_value = false
+adapter "tv" {
+    type = "viera"
+    config {
+        mac = "48:A9:D2:53:DC:10"
+    }
 }
 
-trigger "toggle_denon_on" {
-    key = "deconz.sensors.10.buttonevent"
-    value = 4002
-    target = "dra.on"
-    target_value = false
+trigger "denon_volume_up" {
+    key = "deconz.sensors[10].buttonevent"
+    condition = "dra.power && deconz.sensors[10].buttonevent === 5001"
+    end_condition = "deconz.sensors[10].buttonevent === 5003"
+    action = "dra.master_volume = 'UP'"
+    interval = 100
+}
+
+trigger "denon_volume_down" {
+    key = "deconz.sensors[10].buttonevent"
+    condition = "dra.power && deconz.sensors[10].buttonevent === 4001"
+    end_condition = "deconz.sensors[10].buttonevent === 4003"
+    action = "dra.master_volume = 'DOWN'"
+    interval = 100
 }

@@ -7,10 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/orktes/homeautomation/adapter/deconz"
-	"github.com/orktes/homeautomation/adapter/dra"
 	"github.com/orktes/homeautomation/config"
 	"github.com/orktes/homeautomation/hub"
+	"github.com/orktes/homeautomation/registry"
+
+	// Adapters
+	_ "github.com/orktes/homeautomation/adapter/deconz"
+	_ "github.com/orktes/homeautomation/adapter/dra"
+	_ "github.com/orktes/homeautomation/adapter/viera"
 )
 
 func main() {
@@ -26,20 +30,12 @@ func main() {
 
 	h := hub.New()
 	for _, adapterConfig := range conf.Adapters {
-		switch adapterConfig.Type {
-		case "deconz":
-			ad, err := deconz.Create(adapterConfig.ID, adapterConfig.Config, h)
-			if err != nil {
-				panic(err)
-			}
-			h.AddAdapter(adapterConfig.ID, ad)
-		case "dra":
-			ad, err := dra.Create(adapterConfig.ID, adapterConfig.Config, h)
-			if err != nil {
-				panic(err)
-			}
-			h.AddAdapter(adapterConfig.ID, ad)
+		ad, err := registry.Create(adapterConfig, h)
+		if err != nil {
+			fmt.Printf("Could not init %s (%s)\n", adapterConfig.ID, adapterConfig.Type)
+			panic(err)
 		}
+		h.AddAdapter(adapterConfig.ID, ad)
 	}
 
 	for _, trigger := range conf.Trigger {
@@ -56,6 +52,17 @@ func main() {
 			}
 		}
 	}()
+
+	/*
+		val, err := h.RunScript(`
+			tv[1].power = on
+		`)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("%+v\n", val)
+	*/
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
