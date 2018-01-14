@@ -295,8 +295,11 @@ func (vt *VieraTV) Set(id string, val interface{}) error {
 			vt.setMute(boolval)
 		}
 	case "volume":
-		if intval, ok := val.(int); ok {
-			vt.setVolume(intval)
+		switch val := val.(type) {
+		case int:
+			vt.setVolume(val)
+		case int64:
+			vt.setVolume(int(val))
 		}
 	}
 

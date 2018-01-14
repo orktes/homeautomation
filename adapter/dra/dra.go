@@ -110,16 +110,18 @@ func (dra *DRA) Set(id string, val interface{}) error {
 
 	switch id {
 	case "master_volume":
-		if intval, ok := val.(int); ok {
-			return dra.DRA.SetMasterVolume(intval)
-		} else if strval, ok := val.(string); ok {
-			if strval == "UP" {
+		switch val := val.(type) {
+		case int:
+			return dra.DRA.SetMasterVolume(val)
+		case int64:
+			return dra.DRA.SetMasterVolume(int(val))
+		case string:
+			if val == "UP" {
 				return dra.DRA.Send("MVUP")
-			} else if strval == "DOWN" {
+			} else if val == "DOWN" {
 				return dra.DRA.Send("MVDOWN")
 			}
 		}
-
 	case "mute":
 		if boolval, ok := val.(bool); ok {
 			return dra.DRA.SetMute(boolval)
