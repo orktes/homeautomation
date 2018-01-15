@@ -25,9 +25,10 @@ type LightStateChange struct {
 	TransitionTime int     `json:"transitiontime,omitempty"`
 }
 
-type LightStateChangeResponse []struct {
+type LightStateChangeResponseItem struct {
 	Success map[string]interface{} `json:"success,omitempty"`
 }
+type LightStateChangeResponse []LightStateChangeResponseItem
 
 type Light struct {
 	State            LightState `json:"state"`

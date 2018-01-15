@@ -127,19 +127,32 @@ func (hue *Hue) setLightState(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			}
 
+			resp := LightStateChangeResponse{}
 			// Check different states and act accordinly
 			if state.On != nil {
-				light.SetOn(*state.On)
+				err := light.SetOn(*state.On)
 				// TODO process errors
+				if err == nil {
+					resp = append(resp, LightStateChangeResponseItem{
+						Success: map[string]interface{}{
+							fmt.Sprintf("/lights/%s/state/on", id): *state.On,
+						},
+					})
+				}
 			}
 
 			if state.Bri != nil {
-				light.SetBrightness(*state.Bri)
+				err := light.SetBrightness(*state.Bri)
 				// TODO process errors
+				if err == nil {
+					resp = append(resp, LightStateChangeResponseItem{
+						Success: map[string]interface{}{
+							fmt.Sprintf("/lights/%s/state/bri", id): *state.Bri,
+						},
+					})
+				}
 			}
 
-			resp := &LightStateChangeResponse{}
-			// TODO set correct state
 			c.JSON(200, resp)
 			return
 		}
