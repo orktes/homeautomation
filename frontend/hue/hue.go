@@ -53,7 +53,7 @@ func (hue *Hue) init() error {
 
 func (hue *Hue) initUPNP() error {
 	// TODO make upnp multicast addr configurable
-	createUPNPResponder(fmt.Sprint("http://%s:%d/upnp/setup.xml", hue.IP, hue.Port), hue.UUID, "239.255.255.250:1900")
+	createUPNPResponder(fmt.Sprintf("http://%s:%d/upnp/setup.xml", hue.IP, hue.Port), hue.UUID, "239.255.255.250:1900")
 	return nil
 }
 
