@@ -1,2 +1,3 @@
 - Move hub.lights to adapters
 - Add triggers to adapters
+- deconz wait for more updates before sending new state. (batching)

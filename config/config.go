@@ -34,6 +34,18 @@ type Light struct {
 	Write LightState `hcl:"write"`
 }
 
+// SwitchState represents a switch state
+type SwitchState struct {
+	On string `hcl:"ok"`
+}
+
+// Switch represents a switch
+type Switch struct {
+	Name  string      `hcl:"name,key"`
+	Read  SwitchState `hcl:"read"`
+	Write SwitchState `hcl:"write"`
+}
+
 // Amplifier represent a single amplifier
 type Amplifier struct {
 	Name   string `hcl:"name,key"`
@@ -76,6 +88,7 @@ type Config struct {
 	Sensors          []Sensor          `hcl:"sensor"`
 	Trigger          []Trigger         `hcl:"trigger"`
 	Lights           []Light           `hcl:"light"`
+	Switchs          []Switch          `hcl:"switch"`
 	Amplifiers       []Amplifier       `hcl:"amplifier"`
 	MediaControllers []MediaController `hcl:"mediacontroller"`
 	Televisions      []Television      `hcl:"television"`

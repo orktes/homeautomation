@@ -55,3 +55,4 @@ light "Livingroom" {
         on = "deconz.groups.1.on"
     }
 }
+

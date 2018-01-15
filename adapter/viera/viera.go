@@ -109,6 +109,10 @@ func (vd *VieraDiscovery) UpdateChannel() <-chan adapter.Update {
 	return vd.Updater.UpdateChannel()
 }
 
+func (vd *VieraDiscovery) Close() error {
+	panic("Not yet implemented")
+}
+
 // Create returns a new denon dra instance
 func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
 

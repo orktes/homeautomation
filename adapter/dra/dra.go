@@ -156,6 +156,10 @@ func (dra *DRA) UpdateChannel() <-chan adapter.Update {
 	return dra.Updater.UpdateChannel()
 }
 
+func (dra *DRA) Close() error {
+	panic("Not yet implemented")
+}
+
 // Create returns a new denon dra instance
 func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
 	dra := &DRA{

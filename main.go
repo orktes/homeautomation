@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"reflect"
 	"syscall"
 
 	"github.com/orktes/homeautomation/config"
@@ -67,6 +68,9 @@ func main() {
 			}
 		}
 	}()
+
+	val, _ := h.RunScript("1")
+	fmt.Printf("%s", reflect.TypeOf(val))
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)

@@ -21,7 +21,7 @@ type LightUpdate struct {
 
 // Light represent a hub light
 type Light struct {
-	hub  *Hub
+	hub  adapter.Adapter
 	id   string
 	conf config.Light
 
@@ -72,7 +72,7 @@ func (l *Light) SetBrightness(val int) error {
 	return l.hub.Set(l.conf.Write.Brightness, val)
 }
 
-func (l *Light) GetON() (bool, error) {
+func (l *Light) GetOn() (bool, error) {
 	if l.conf.Read.On == "" {
 		return false, nil
 	}

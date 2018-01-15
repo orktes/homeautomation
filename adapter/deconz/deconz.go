@@ -338,6 +338,10 @@ func (deconz *Deconz) register() {
 	panic("Not yet implemented")
 }
 
+func (deconz *Deconz) Close() error {
+	panic("Not yet implemented")
+}
+
 // Create returns a new Deconz instance
 func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
 	if deconz, ok := instances[id]; ok {

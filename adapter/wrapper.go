@@ -74,8 +74,6 @@ func (w *Wrapper) Set(id string, val interface{}) error {
 }
 
 func (w *Wrapper) GetAll() (map[string]interface{}, error) {
-	fmt.Printf("Get mappign %+v\n", w.getMapping)
-
 	all := map[string]interface{}{}
 
 	for key, fn := range w.getMapping {

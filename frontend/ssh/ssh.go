@@ -105,6 +105,10 @@ func (sshf *SSHFrontend) listen() error {
 	return sshf.Server.ListenAndServe()
 }
 
+func (sshf *SSHFrontend) Close() error {
+	panic("Not implemented")
+}
+
 func Create(id string, config map[string]interface{}, hub *hub.Hub) (frontend.Frontend, error) {
 	addr := config["addr"].(string)
 	password := config["password"].(string)
