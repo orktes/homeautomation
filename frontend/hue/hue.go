@@ -172,8 +172,20 @@ func (hue *Hue) serveSetupXML(c *gin.Context) {
 	c.String(http.StatusOK, b.String())
 }
 
-func (hue *Hue) convertLightToHueFormat(l *hub.Light) (Light, error) {
-	return Light{}, nil
+func (hue *Hue) convertLightToHueFormat(l *hub.Light) (light Light, err error) {
+	light.Name = l.GetName()
+	light.Type = "Color temperature light"
+
+	light.State.Bri, err = l.GetBrightness()
+	if err != nil {
+		return
+	}
+	light.State.On, err = l.GetOn()
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func (hue *Hue) Close() error {
