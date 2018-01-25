@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"reflect"
 	"syscall"
 
+	"github.com/orktes/homeautomation/adapter"
+
 	"github.com/orktes/homeautomation/config"
-	"github.com/orktes/homeautomation/hub"
-	"github.com/orktes/homeautomation/registry"
 
 	// Adapters
-	_ "github.com/orktes/homeautomation/adapter/deconz"
-	_ "github.com/orktes/homeautomation/adapter/dra"
-	_ "github.com/orktes/homeautomation/adapter/viera"
+	"github.com/orktes/homeautomation/adapter/bolt"
+	"github.com/orktes/homeautomation/adapter/deconz"
+	"github.com/orktes/homeautomation/adapter/dra"
+	"github.com/orktes/homeautomation/adapter/viera"
 
-	// Frontends
-	_ "github.com/orktes/homeautomation/frontend/ssh"
+	"github.com/orktes/homeautomation/mqtt"
 )
 
 func main() {
@@ -32,50 +31,65 @@ func main() {
 		panic(err)
 	}
 
-	h := hub.New()
-	for _, adapterConfig := range conf.Adapters {
-		ad, err := registry.CreateAdapter(adapterConfig, h)
+	if len(conf.Adapters) > 1 && conf.Root == "" {
+		fmt.Println("root path must be defined when difining multiple adapters")
+		os.Exit(1)
+		return
+	}
+
+	adapters := make([]adapter.Adapter, 0, len(conf.Adapters))
+
+	for _, adapterConf := range conf.Adapters {
+		var createFunc func(id string, config map[string]interface{}) (adapter.Adapter, error)
+		switch adapterConf.Type {
+		case "deconz":
+			createFunc = deconz.Create
+		case "dra":
+			createFunc = dra.Create
+		case "viera":
+			createFunc = viera.Create
+		case "bolt":
+			createFunc = bolt.Create
+		default:
+			fmt.Printf("No such adapter %s\n", adapterConf.Type)
+			os.Exit(1)
+			return
+		}
+
+		adapter, err := createFunc(adapterConf.ID, adapterConf.Config)
 		if err != nil {
-			fmt.Printf("Could not init %s (%s)\n", adapterConfig.ID, adapterConfig.Type)
-			panic(err)
+			fmt.Printf("Error creating adapter %s: %s\n", adapterConf.Type, err.Error())
+			os.Exit(1)
 		}
-		h.AddAdapter(adapterConfig.ID, ad)
+
+		adapters = append(adapters, adapter)
 	}
 
-	for _, lightConfig := range conf.Lights {
-		h.CreateLight(lightConfig)
+	var mainAdapter adapter.Adapter
+	if len(adapters) == 0 {
+		mainAdapter = adapters[0]
+	} else {
+		mainAdapter = adapter.NewMultiAdapter(conf.Root, adapters...)
+		// Root key now comes from multi adapter
+		conf.Root = ""
 	}
 
-	for _, trigger := range conf.Trigger {
-		h.CreateTrigger(trigger)
+	mqttBridge := mqtt.New(conf, mainAdapter)
+
+	if err = mqttBridge.Connect(); err != nil {
+		fmt.Printf("Error connecting to mqtt brokers %s\n", err.Error())
+		os.Exit(1)
+		return
 	}
-
-	for _, frontendConf := range conf.Frontends {
-		_, err := registry.CreateFrontend(frontendConf, h)
-		if err != nil {
-			fmt.Printf("Could not init %s (%s)\n", frontendConf.ID, frontendConf.Type)
-			panic(err)
-		}
-	}
-
-	fmt.Printf("Configuration done!\n")
-
-	go func() {
-		ch := h.UpdateChannel()
-		for u := range ch {
-			for _, ukv := range u.Updates {
-				fmt.Printf("Update %s = %v\n", ukv.Key, ukv.Value)
-			}
-		}
-	}()
-
-	val, _ := h.RunScript("1")
-	fmt.Printf("%s", reflect.TypeOf(val))
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
 
 	<-c
 
-	h.Close()
+	if err = mqttBridge.Disconnect(0); err != nil {
+		fmt.Printf("Error disconnecting from mqtt brokers %s\n", err.Error())
+		os.Exit(1)
+		return
+	}
 }

@@ -1,11 +1,7 @@
-frontend "ssh" {
-    type = "ssh"
-    config {
-        addr = ":2222"
-        password = "jaakonkoti"
-    }
-}
+root = "haaga"
+servers = ["tcp://localhost:1883"]
 
+/*
 adapter "deconz" {
     type = "deconz"
     config {
@@ -28,31 +24,11 @@ adapter "tv" {
         mac = "48:A9:D2:53:DC:10"
     }
 }
+*/
 
-trigger "denon_volume_up" {
-    key = "deconz.sensors[10].buttonevent"
-    condition = "dra.power && deconz.sensors[10].buttonevent === 5001"
-    end_condition = "deconz.sensors[10].buttonevent === 5003"
-    action = "dra.master_volume = 'UP'"
-    interval = 100
-}
-
-trigger "denon_volume_down" {
-    key = "deconz.sensors[10].buttonevent"
-    condition = "dra.power && deconz.sensors[10].buttonevent === 4001"
-    end_condition = "deconz.sensors[10].buttonevent === 4003"
-    action = "dra.master_volume = 'DOWN'"
-    interval = 100
-}
-
-light "Livingroom" {
-    read {
-        bri = "deconz.groups.1.bri"
-        on = "deconz.groups.1.any_on"
+adapter "db" {
+    type = "bolt"
+    config {
+        database_file = "./test.db"
     }
-    write {
-        bri = "deconz.groups.1.bri"
-        on = "deconz.groups.1.on"
-    }
-}
-
+} 
