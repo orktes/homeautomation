@@ -82,6 +82,17 @@ func (bridge *MQTTBridge) getRoot() string {
 	return strings.Split(root, "/")[0]
 }
 
+func (bridge *MQTTBridge) publishBridgeStatus() error {
+	root := bridge.getRoot()
+
+	// TODO add way for adaptor to tell state
+	if token := bridge.c.Publish(root+"/connected", 2, false, []byte("2")); token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	return nil
+}
+
 func (bridge *MQTTBridge) publishStatus(key string, val interface{}) error {
 	topic := bridge.buildTopic(key, "status")
 	if b, err := json.Marshal(val); err == nil {
@@ -95,13 +106,9 @@ func (bridge *MQTTBridge) publishStatus(key string, val interface{}) error {
 }
 
 func (bridge *MQTTBridge) publishStatuses() error {
-	root := bridge.getRoot()
-
-	// TODO add way for adaptor to tell state
-	if token := bridge.c.Publish(root+"/connected", 2, false, []byte("2")); token.Wait() && token.Error() != nil {
-		return token.Error()
+	if err := bridge.publishBridgeStatus(); err != nil {
+		return err
 	}
-
 	return util.Traverse(bridge.adapter, bridge.publishStatus, true)
 }
 
