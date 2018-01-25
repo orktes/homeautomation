@@ -32,7 +32,7 @@ func main() {
 	}
 
 	if len(conf.Adapters) > 1 && conf.Root == "" {
-		fmt.Println("root path must be defined when difining multiple adapters")
+		fmt.Println("root path must be defined when defining multiple adapters")
 		os.Exit(1)
 		return
 	}
