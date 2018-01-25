@@ -174,7 +174,7 @@ func (vt *VieraTV) readVolume(emitUpdate bool) error {
 					ValueContainer: vt,
 					Updates: []adapter.ValueUpdate{
 						adapter.ValueUpdate{
-							Key:   vt.id + ".volume",
+							Key:   vt.id + "/volume",
 							Value: val,
 						},
 					},
@@ -211,7 +211,7 @@ func (vt *VieraTV) readMute(emitUpdate bool) error {
 					ValueContainer: vt,
 					Updates: []adapter.ValueUpdate{
 						adapter.ValueUpdate{
-							Key:   vt.id + ".mute",
+							Key:   vt.id + "/mute",
 							Value: val,
 						},
 					},
@@ -299,6 +299,8 @@ func (vt *VieraTV) Set(id string, val interface{}) error {
 		case int:
 			vt.setVolume(val)
 		case int64:
+			vt.setVolume(int(val))
+		case float64:
 			vt.setVolume(int(val))
 		}
 	}

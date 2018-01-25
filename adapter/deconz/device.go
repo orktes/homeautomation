@@ -14,7 +14,7 @@ type lightDevice struct {
 }
 
 func (ld *lightDevice) ID() string {
-	return ld.deconz.id + ".lights." + ld.id
+	return ld.deconz.id + "/lights/" + ld.id
 }
 
 func (ld *lightDevice) UpdateChannel() <-chan adapter.Update {
@@ -49,7 +49,7 @@ func (ld *lightDevice) updateState(state *lightState) {
 	du := adapter.Update{}
 	du.ValueContainer = ld
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: ld.ID() + "." + kp.key, Value: kp.val})
+		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: ld.ID() + "/" + kp.key, Value: kp.val})
 	}
 
 	for _, ch := range ld.updateChannels {
@@ -65,7 +65,7 @@ type groupDevice struct {
 }
 
 func (gd *groupDevice) ID() string {
-	return gd.deconz.id + ".groups." + gd.id
+	return gd.deconz.id + "/groups/" + gd.id
 }
 
 func (gd *groupDevice) UpdateChannel() <-chan adapter.Update {
@@ -106,7 +106,7 @@ func (gd *groupDevice) updateState(state *groupState) {
 	du := adapter.Update{}
 	du.ValueContainer = gd
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: gd.ID() + "." + kp.key, Value: kp.val})
+		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: gd.ID() + "/" + kp.key, Value: kp.val})
 	}
 
 	for _, ch := range gd.updateChannels {
@@ -122,7 +122,7 @@ type sensorDevice struct {
 }
 
 func (sd *sensorDevice) ID() string {
-	return sd.deconz.id + ".sensors." + sd.id
+	return sd.deconz.id + "/sensors/" + sd.id
 }
 
 func (sd *sensorDevice) UpdateChannel() <-chan adapter.Update {
@@ -154,7 +154,7 @@ func (sd *sensorDevice) updateState(state *sensorState) {
 	du := adapter.Update{}
 	du.ValueContainer = sd
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: sd.ID() + "." + kp.key, Value: kp.val})
+		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: sd.ID() + "/" + kp.key, Value: kp.val})
 	}
 
 	for _, ch := range sd.updateChannels {

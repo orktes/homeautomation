@@ -13,8 +13,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/orktes/homeautomation/adapter"
-	"github.com/orktes/homeautomation/hub"
-	"github.com/orktes/homeautomation/registry"
 )
 
 var (
@@ -44,9 +42,9 @@ func (deconz *Deconz) Set(id string, val interface{}) error {
 		return errors.New("Value can't be assigned to the deconz router")
 	}
 
-	parts := strings.Split(id, ".")
+	parts := strings.Split(id, "/")
 
-	parent := strings.Join(parts[0:len(parts)-1], ".")
+	parent := strings.Join(parts[0:len(parts)-1], "/")
 	c, err := deconz.Get(parent)
 	if err != nil {
 		return err
@@ -68,7 +66,7 @@ func (deconz *Deconz) Get(id string) (interface{}, error) {
 		return deconz, nil
 	}
 
-	parts := strings.Split(id, ".")
+	parts := strings.Split(id, "/")
 
 	if len(parts) == 1 {
 		return &groupValueContainer{group: parts[0], deconz: deconz}, nil
@@ -93,7 +91,7 @@ func (deconz *Deconz) Get(id string) (interface{}, error) {
 
 	if res != nil {
 		if len(parts) > 2 {
-			return res.Get(strings.Join(parts[2:], "."))
+			return res.Get(strings.Join(parts[2:], "/"))
 		}
 
 		return res, nil
@@ -113,6 +111,10 @@ func (deconz *Deconz) GetAll() (map[string]interface{}, error) {
 	}
 
 	return devices, nil
+}
+
+func (deconz *Deconz) ID() string {
+	return deconz.id
 }
 
 func (deconz *Deconz) UpdateChannel() <-chan adapter.Update {
@@ -203,7 +205,7 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 	url := fmt.Sprintf("ws://%s:%d", host, port)
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	for {
@@ -215,6 +217,7 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 		if messageType == websocket.CloseMessage {
 			return
 		}
+
 		ev := &event{}
 		err = json.Unmarshal(message, ev)
 		if err != nil {
@@ -222,7 +225,7 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 			continue
 		}
 		if ev.Event == "changed" {
-			device, err := deconz.Get(ev.Route + "." + ev.ID)
+			device, err := deconz.Get(ev.Route + "/" + ev.ID)
 			if err != nil {
 				fmt.Printf("Error occured while updating device with event event: %s", err.Error())
 				continue
@@ -232,15 +235,15 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 			case *lightDevice:
 				s := &lightState{}
 				ev.unmarshalState(s)
-				d.updateState(s)
+				go d.updateState(s)
 			case *groupDevice:
 				s := &groupState{}
 				ev.unmarshalState(s)
-				d.updateState(s)
+				go d.updateState(s)
 			case *sensorDevice:
 				s := &sensorState{}
 				ev.unmarshalState(s)
-				d.updateState(s)
+				go d.updateState(s)
 			}
 
 		}
@@ -343,7 +346,7 @@ func (deconz *Deconz) Close() error {
 }
 
 // Create returns a new Deconz instance
-func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
+func Create(id string, config map[string]interface{}) (adapter.Adapter, error) {
 	if deconz, ok := instances[id]; ok {
 		return deconz, nil
 	}
@@ -368,8 +371,4 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 	instances[id] = deconz
 
 	return deconz, nil
-}
-
-func init() {
-	registry.RegisterAdapter("deconz", Create)
 }

@@ -7,8 +7,6 @@ import (
 
 	denondra "github.com/orktes/go-dra"
 	"github.com/orktes/homeautomation/adapter"
-	"github.com/orktes/homeautomation/hub"
-	"github.com/orktes/homeautomation/registry"
 )
 
 type DRA struct {
@@ -38,7 +36,7 @@ start:
 				ValueContainer: dra,
 				Updates: []adapter.ValueUpdate{
 					adapter.ValueUpdate{
-						Key:   dra.id + ".master_volume",
+						Key:   dra.id + "/master_volume",
 						Value: dra.GetMasterVolume(),
 					},
 				},
@@ -48,7 +46,7 @@ start:
 				ValueContainer: dra,
 				Updates: []adapter.ValueUpdate{
 					adapter.ValueUpdate{
-						Key:   dra.id + ".mute",
+						Key:   dra.id + "/mute",
 						Value: dra.GetMute(),
 					},
 				},
@@ -58,7 +56,7 @@ start:
 				ValueContainer: dra,
 				Updates: []adapter.ValueUpdate{
 					adapter.ValueUpdate{
-						Key:   dra.id + ".input",
+						Key:   dra.id + "/input",
 						Value: dra.GetInput(),
 					},
 				},
@@ -68,7 +66,7 @@ start:
 				ValueContainer: dra,
 				Updates: []adapter.ValueUpdate{
 					adapter.ValueUpdate{
-						Key:   dra.id + ".power",
+						Key:   dra.id + "/power",
 						Value: dra.GetPower(),
 					},
 				},
@@ -161,7 +159,7 @@ func (dra *DRA) Close() error {
 }
 
 // Create returns a new denon dra instance
-func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
+func Create(id string, config map[string]interface{}) (adapter.Adapter, error) {
 	dra := &DRA{
 		id:   id,
 		addr: config["address"].(string),
@@ -171,8 +169,4 @@ func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Ada
 
 	return dra, nil
 
-}
-
-func init() {
-	registry.RegisterAdapter("dra", Create)
 }

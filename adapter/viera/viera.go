@@ -8,8 +8,6 @@ import (
 
 	"github.com/huin/goupnp"
 	"github.com/orktes/homeautomation/adapter"
-	"github.com/orktes/homeautomation/hub"
-	"github.com/orktes/homeautomation/registry"
 )
 
 type VieraDiscovery struct {
@@ -31,7 +29,7 @@ func (vd *VieraDiscovery) initialize() error {
 	}
 
 	for i, info := range responses {
-		tv := &VieraTV{id: fmt.Sprintf("%s.%d", vd.id, i+1), host: info.Root.URLBase.Host, mac: vd.mac}
+		tv := &VieraTV{id: fmt.Sprintf("%s/%d", vd.id, i+1), host: info.Root.URLBase.Host, mac: vd.mac}
 		vd.pipeUpdates(tv)
 		if err := tv.init(); err != nil {
 			return err
@@ -60,9 +58,15 @@ func (vd *VieraDiscovery) Get(id string) (interface{}, error) {
 		return vd, nil
 	}
 
-	intID, _ := strconv.ParseInt(id, 10, 64)
+	parts := strings.Split(id, "/")
+	intID, _ := strconv.ParseInt(parts[0], 10, 64)
 	if intID >= 1 && len(vd.tvs) >= int(intID) {
-		return vd.tvs[int(intID)-1], nil
+		tv := vd.tvs[int(intID)-1]
+		if len(parts) == 1 {
+			return tv, nil
+		}
+
+		return tv.Get(strings.Join(parts[1:], "/"))
 	}
 
 	return nil, nil
@@ -73,18 +77,17 @@ func (vd *VieraDiscovery) Set(id string, val interface{}) error {
 		return nil
 	}
 
-	parts := strings.Split(id, ".")
-	parent := strings.Join(parts[0:len(parts)-1], ".")
-	c, err := vd.Get(parent)
+	parts := strings.Split(id, "/")
+	c, err := vd.Get(parts[0])
 	if err != nil {
 		return err
 	}
 	vc, ok := c.(adapter.ValueContainer)
 	if !ok {
-		return fmt.Errorf("Parent %s is not a value container", parent)
+		return fmt.Errorf("Parent %s is not a value container", parts[0])
 	}
 
-	return vc.Set(parts[len(parts)-1], val)
+	return vc.Set(strings.Join(parts[1:], "/"), val)
 }
 
 func (vd *VieraDiscovery) GetAll() (map[string]interface{}, error) {
@@ -105,6 +108,10 @@ func (vd *VieraDiscovery) GetAll() (map[string]interface{}, error) {
 	return vals, nil
 }
 
+func (vd *VieraDiscovery) ID() string {
+	return vd.id
+}
+
 func (vd *VieraDiscovery) UpdateChannel() <-chan adapter.Update {
 	return vd.Updater.UpdateChannel()
 }
@@ -114,14 +121,10 @@ func (vd *VieraDiscovery) Close() error {
 }
 
 // Create returns a new denon dra instance
-func Create(id string, config map[string]interface{}, hub *hub.Hub) (adapter.Adapter, error) {
+func Create(id string, config map[string]interface{}) (adapter.Adapter, error) {
 
 	mac, _ := config["mac"].(string)
 
 	viera := &VieraDiscovery{id: id, mac: mac}
 	return viera, viera.initialize()
-}
-
-func init() {
-	registry.RegisterAdapter("viera", Create)
 }
