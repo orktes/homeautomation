@@ -138,6 +138,8 @@ func (bridge *MQTTBridge) defaultHandler(client mqtt.Client, msg mqtt.Message) {
 	topic := msg.Topic()
 	payload := msg.Payload()
 
+	fmt.Printf("MQTT received %s %s\n", topic, string(payload))
+
 	parts := strings.Split(topic, "/")
 	root := bridge.getRoot()
 
