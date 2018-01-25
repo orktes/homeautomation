@@ -15,13 +15,18 @@ type Adapter struct {
 }
 
 // Config represents homeautomation config
-type Config struct {
+type BridgeConfig struct {
 	Servers  []string  `hcl:"servers"`
 	Username string    `hcl:"username"`
 	Password string    `hcl:"password"`
 	ClientID string    `hcl:"client_id"`
 	Root     string    `hcl:"root"`
 	Adapters []Adapter `hcl:"adapter"`
+}
+
+// Config represents homeautomation config
+type Config struct {
+	Bridge *BridgeConfig `hcl:"bridge"`
 }
 
 // Parse config returns a Config struct pointer parsed from a given reader

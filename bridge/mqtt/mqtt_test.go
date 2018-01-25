@@ -6,7 +6,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/orktes/homeautomation/config"
+	"github.com/orktes/homeautomation/bridge/config"
 )
 
 type mockMessage struct {
@@ -114,7 +114,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 	}
 	ma.Set("foo", "bar")
 
-	bridge := New(config.Config{}, ma)
+	bridge := New(config.BridgeConfig{}, ma)
 
 	subs := make(chan struct {
 		topic    string
@@ -359,7 +359,7 @@ func TestMQTTBridgeSet(t *testing.T) {
 		vals: map[string]interface{}{},
 	}
 
-	bridge := New(config.Config{}, ma)
+	bridge := New(config.BridgeConfig{}, ma)
 
 	subs := make(chan struct {
 		topic    string

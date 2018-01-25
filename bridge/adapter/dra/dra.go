@@ -6,7 +6,7 @@ import (
 	"time"
 
 	denondra "github.com/orktes/go-dra"
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 type DRA struct {

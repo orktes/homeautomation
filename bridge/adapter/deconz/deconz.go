@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 var (

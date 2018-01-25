@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/boltdb/bolt"
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 type BOLT struct {

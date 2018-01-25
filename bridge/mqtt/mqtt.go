@@ -6,18 +6,18 @@ import (
 	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
+	"github.com/orktes/homeautomation/bridge/util"
 	"github.com/orktes/homeautomation/config"
-	"github.com/orktes/homeautomation/util"
 )
 
 type MQTTBridge struct {
 	adapter adapter.Adapter
-	conf    config.Config
+	conf    config.BridgeConfig
 	c       mqtt.Client
 }
 
-func New(conf config.Config, adapter adapter.Adapter) *MQTTBridge {
+func New(conf config.BridgeConfig, adapter adapter.Adapter) *MQTTBridge {
 	bri := &MQTTBridge{conf: conf, adapter: adapter}
 	bri.subscribeToAdapter()
 	return bri

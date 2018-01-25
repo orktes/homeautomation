@@ -1,6 +1,6 @@
 package mqtt
 
-import "github.com/orktes/homeautomation/adapter"
+import "github.com/orktes/homeautomation/bridge/adapter"
 
 type mockAdapter struct {
 	id   string

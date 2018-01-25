@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/huin/goupnp"
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 type VieraDiscovery struct {

@@ -3,7 +3,7 @@ package util
 import (
 	"strings"
 
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 func Traverse(vc adapter.ValueContainer, cb func(key string, val interface{}) error, includeRoot bool) error {

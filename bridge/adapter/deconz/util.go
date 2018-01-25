@@ -3,7 +3,7 @@ package deconz
 import (
 	"reflect"
 
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
 type updatedKey struct {

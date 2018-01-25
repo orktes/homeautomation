@@ -14,7 +14,7 @@ import (
 
 	"text/template"
 
-	"github.com/orktes/homeautomation/adapter"
+	"github.com/orktes/homeautomation/bridge/adapter"
 	wol "github.com/sabhiram/go-wol"
 )
 
