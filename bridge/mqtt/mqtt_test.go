@@ -6,7 +6,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/orktes/homeautomation/bridge/config"
+	"github.com/orktes/homeautomation/config"
 )
 
 type mockMessage struct {
@@ -144,12 +144,12 @@ func TestMQTTBridgeGet(t *testing.T) {
 	t.Run("subscribe", func(t *testing.T) {
 		go bridge.subscribeToTopics()
 		sub := <-subs
-		if sub.topic != "adid/set#" {
+		if sub.topic != "adid/set/#" {
 			t.Error("Wrong topic subs", sub.topic)
 		}
 
 		sub = <-subs
-		if sub.topic != "adid/get#" {
+		if sub.topic != "adid/get/#" {
 			t.Error("Wrong topic subs", sub.topic)
 		}
 
@@ -197,12 +197,12 @@ func TestMQTTBridgeGet(t *testing.T) {
 		t.Run("subscribe", func(t *testing.T) {
 			go bridge.subscribeToTopics()
 			sub := <-subs
-			if sub.topic != "bridgeroot/set#" {
+			if sub.topic != "bridgeroot/set/#" {
 				t.Error("Wrong topic subs", sub.topic)
 			}
 
 			sub = <-subs
-			if sub.topic != "bridgeroot/get#" {
+			if sub.topic != "bridgeroot/get/#" {
 				t.Error("Wrong topic subs", sub.topic)
 			}
 
@@ -249,12 +249,12 @@ func TestMQTTBridgeGet(t *testing.T) {
 		t.Run("subscribe", func(t *testing.T) {
 			go bridge.subscribeToTopics()
 			sub := <-subs
-			if sub.topic != "bridgeroot/set#" {
+			if sub.topic != "bridgeroot/set/#" {
 				t.Error("Wrong topic subs", sub.topic)
 			}
 
 			sub = <-subs
-			if sub.topic != "bridgeroot/get#" {
+			if sub.topic != "bridgeroot/get/#" {
 				t.Error("Wrong topic subs", sub.topic)
 			}
 
