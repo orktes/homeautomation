@@ -114,7 +114,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 	}
 	ma.Set("foo", "bar")
 
-	bridge := New(config.BridgeConfig{}, ma)
+	bridge := New(config.Config{}, ma)
 
 	subs := make(chan struct {
 		topic    string
@@ -177,7 +177,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 
 	t.Run("Root ID", func(t *testing.T) {
 		// Try with root
-		bridge.conf.Root = "bridgeroot"
+		bridge.conf.Bridge.Root = "bridgeroot"
 
 		t.Run("publish statuses", func(t *testing.T) {
 
@@ -230,7 +230,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 	})
 
 	t.Run("Subroot", func(t *testing.T) {
-		bridge.conf.Root = "bridgeroot/subroot"
+		bridge.conf.Bridge.Root = "bridgeroot/subroot"
 		t.Run("publish statuses", func(t *testing.T) {
 
 			go bridge.publishStatuses()
@@ -282,7 +282,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 	})
 
 	t.Run("new value", func(t *testing.T) {
-		bridge.conf.Root = ""
+		bridge.conf.Bridge.Root = ""
 		go ma.Set("biz", "foz")
 
 		stus := <-pubs
@@ -308,7 +308,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 		})
 
 		t.Run("multi value get with root", func(t *testing.T) {
-			bridge.conf.Root = "rootpath"
+			bridge.conf.Bridge.Root = "rootpath"
 			go bridge.defaultHandler(bridge.c, &mockMessage{topic: "rootpath/get/adid", payload: []byte{}})
 			stus := <-pubs
 			if stus.topic != "rootpath/status/adid/biz" && stus.topic != "rootpath/status/adid/foo" {
@@ -326,7 +326,7 @@ func TestMQTTBridgeGet(t *testing.T) {
 		})
 
 		t.Run("multi value get with root & subroot", func(t *testing.T) {
-			bridge.conf.Root = "rootpath/something"
+			bridge.conf.Bridge.Root = "rootpath/something"
 			check := func() {
 				stus := <-pubs
 				if stus.topic != "rootpath/status/something/adid/biz" && stus.topic != "rootpath/status/something/adid/foo" {
@@ -359,7 +359,7 @@ func TestMQTTBridgeSet(t *testing.T) {
 		vals: map[string]interface{}{},
 	}
 
-	bridge := New(config.BridgeConfig{}, ma)
+	bridge := New(config.Config{}, ma)
 
 	subs := make(chan struct {
 		topic    string

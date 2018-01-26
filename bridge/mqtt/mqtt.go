@@ -13,11 +13,11 @@ import (
 
 type MQTTBridge struct {
 	adapter adapter.Adapter
-	conf    config.BridgeConfig
+	conf    config.Config
 	c       mqtt.Client
 }
 
-func New(conf config.BridgeConfig, adapter adapter.Adapter) *MQTTBridge {
+func New(conf config.Config, adapter adapter.Adapter) *MQTTBridge {
 	bri := &MQTTBridge{conf: conf, adapter: adapter}
 	bri.subscribeToAdapter()
 	return bri
@@ -66,8 +66,8 @@ func (bridge *MQTTBridge) Disconnect(wait uint) error {
 
 func (bridge *MQTTBridge) buildTopic(key string, function string) string {
 	parts := strings.Split(key, "/")
-	if bridge.conf.Root != "" {
-		parts = append(strings.Split(bridge.conf.Root, "/"), parts...)
+	if bridge.conf.Bridge.Root != "" {
+		parts = append(strings.Split(bridge.conf.Bridge.Root, "/"), parts...)
 	}
 
 	toplevel := parts[0]
@@ -75,7 +75,7 @@ func (bridge *MQTTBridge) buildTopic(key string, function string) string {
 }
 
 func (bridge *MQTTBridge) getRoot() string {
-	root := bridge.conf.Root
+	root := bridge.conf.Bridge.Root
 	if root == "" {
 		root = bridge.adapter.ID()
 	}
@@ -166,8 +166,8 @@ func (bridge *MQTTBridge) defaultHandler(client mqtt.Client, msg mqtt.Message) {
 
 	path = append([]string{root}, path...)
 
-	if bridge.conf.Root != "" {
-		start := len(strings.Split(bridge.conf.Root, "/"))
+	if bridge.conf.Bridge.Root != "" {
+		start := len(strings.Split(bridge.conf.Bridge.Root, "/"))
 
 		if start > len(path)-1 {
 			path = []string{}

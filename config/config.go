@@ -14,19 +14,26 @@ type Adapter struct {
 	Config map[string]interface{} `hcl:"config"`
 }
 
-// Config represents homeautomation config
+// BridgeConfig represents homeautomation config
 type BridgeConfig struct {
-	Servers  []string  `hcl:"servers"`
-	Username string    `hcl:"username"`
-	Password string    `hcl:"password"`
-	ClientID string    `hcl:"client_id"`
-	Root     string    `hcl:"root"`
 	Adapters []Adapter `hcl:"adapter"`
+	Root     string    `hcl:"root"`
+}
+
+// Trigger represents a single toggle
+type Trigger struct {
+	Topics []string `hcl:"topics"`
+	Script string   `hcl:"script"`
 }
 
 // Config represents homeautomation config
 type Config struct {
-	Bridge *BridgeConfig `hcl:"bridge"`
+	Servers  []string      `hcl:"servers"`
+	Username string        `hcl:"username"`
+	Password string        `hcl:"password"`
+	ClientID string        `hcl:"client_id"`
+	Bridge   *BridgeConfig `hcl:"bridge"`
+	Triggers []Trigger     `hcl:"trigger"`
 }
 
 // Parse config returns a Config struct pointer parsed from a given reader
