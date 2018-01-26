@@ -20,7 +20,8 @@ import (
 	"github.com/orktes/homeautomation/bridge/mqtt"
 )
 
-func configureBridge(bridgeConf *config.BridgeConfig) {
+func configureBridge(conf config.Config) {
+	bridgeConf := conf.Bridge
 	if len(bridgeConf.Adapters) > 1 && bridgeConf.Root == "" {
 		fmt.Println("root path must be defined when defining multiple adapters")
 		os.Exit(1)
@@ -64,7 +65,7 @@ func configureBridge(bridgeConf *config.BridgeConfig) {
 		bridgeConf.Root = ""
 	}
 
-	mqttBridge := mqtt.New(*bridgeConf, mainAdapter)
+	mqttBridge := mqtt.New(conf, mainAdapter)
 
 	if err := mqttBridge.Connect(); err != nil {
 		fmt.Printf("Error connecting to mqtt brokers %s\n", err.Error())
@@ -95,7 +96,5 @@ func main() {
 		panic(err)
 	}
 
-	bridgeConf := conf.Bridge
-	configureBridge(bridgeConf)
-
+	configureBridge(conf)
 }
