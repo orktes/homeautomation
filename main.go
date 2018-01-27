@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/orktes/homeautomation/bridge/adapter"
+	"github.com/orktes/homeautomation/trigger"
 
 	"github.com/orktes/homeautomation/config"
 
@@ -20,12 +21,18 @@ import (
 	"github.com/orktes/homeautomation/bridge/mqtt"
 )
 
-func configureBridge(conf config.Config) {
+var NoopCloser = func() error { return nil }
+
+func configureBridge(conf config.Config) func() error {
 	bridgeConf := conf.Bridge
+	if bridgeConf == nil {
+		return NoopCloser
+	}
+
 	if len(bridgeConf.Adapters) > 1 && bridgeConf.Root == "" {
 		fmt.Println("root path must be defined when defining multiple adapters")
 		os.Exit(1)
-		return
+		return NoopCloser
 	}
 
 	adapters := make([]adapter.Adapter, 0, len(bridgeConf.Adapters))
@@ -44,7 +51,7 @@ func configureBridge(conf config.Config) {
 		default:
 			fmt.Printf("No such adapter %s\n", adapterConf.Type)
 			os.Exit(1)
-			return
+			return NoopCloser
 		}
 
 		adapter, err := createFunc(adapterConf.ID, adapterConf.Config)
@@ -70,18 +77,38 @@ func configureBridge(conf config.Config) {
 	if err := mqttBridge.Connect(); err != nil {
 		fmt.Printf("Error connecting to mqtt brokers %s\n", err.Error())
 		os.Exit(1)
-		return
+		return NoopCloser
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
+	return func() error {
+		if err := mqttBridge.Disconnect(0); err != nil {
+			fmt.Printf("Error disconnecting from mqtt brokers %s\n", err.Error())
+			return err
+		}
 
-	<-c
+		return nil
+	}
 
-	if err := mqttBridge.Disconnect(0); err != nil {
-		fmt.Printf("Error disconnecting from mqtt brokers %s\n", err.Error())
+}
+
+func configureTriggerSystem(conf config.Config) func() error {
+	if len(conf.Triggers) == 0 {
+		return NoopCloser
+	}
+
+	ts := trigger.New(conf)
+	if err := ts.Connect(); err != nil {
+		fmt.Printf("Error connecting to mqtt brokers %s\n", err.Error())
 		os.Exit(1)
-		return
+		return NoopCloser
+	}
+	return func() error {
+		if err := ts.Disconnect(0); err != nil {
+			fmt.Printf("Error disconnecting from mqtt brokers %s\n", err.Error())
+			return err
+		}
+
+		return nil
 	}
 }
 
@@ -96,5 +123,15 @@ func main() {
 		panic(err)
 	}
 
-	configureBridge(conf)
+	closeBridge := configureBridge(conf)
+	closeTriggerSystem := configureTriggerSystem(conf)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
+
+	<-c
+
+	closeBridge()
+	closeTriggerSystem()
+
 }

@@ -22,8 +22,7 @@ type BridgeConfig struct {
 
 // Trigger represents a single toggle
 type Trigger struct {
-	Topics []string `hcl:"topics"`
-	Script string   `hcl:"script"`
+	Script string `hcl:"script"`
 }
 
 // Config represents homeautomation config

@@ -37,19 +37,13 @@ bridge {
 
 
 trigger {
-    source = <<SOURCE
-        // Listen to smarthome
-        listen("haaga/tv/1/power", function (topic, payload) {
-            set("haaga/dra/power", true);
-            var val = get("haaga/tv/1/volume");
-            set("haaga/dra/master_volume", val);
-            set("haaga/tv/1/volume", 0);
+    script = <<SOURCE
+        listen("haaga/dra/master_volume", function () {
+            print("dra volume", get("haaga/dra/master_volume"), "power", get("haaga/dra/power"))
         });
 
-        // Subscribe to MQTT topic (with QoS 0)
-        subscribe("haaga/connected", 0, function (topic, payload) {
-            // Payload is just a string here
-            publish("haaga/is/online", 0, "Some payload");
-        });
+        subscribe("haaga/#", function (topic) {
+            print("Wildcard received", topic)
+        })
     SOURCE
 }
