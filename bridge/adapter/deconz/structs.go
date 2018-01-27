@@ -1,9 +1,57 @@
 package deconz
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"time"
 )
+
+type customTime struct {
+	time.Time
+}
+
+func (t customTime) MarshalJSON() ([]byte, error) {
+	if y := t.Year(); y < 0 || y >= 10000 {
+		// RFC 3339 is clear that years are 4 digits exactly.
+		// See golang.org/issue/4556#c15 for more discussion.
+		return nil, errors.New("Time.MarshalJSON: year outside of range [0,9999]")
+	}
+
+	b := make([]byte, 0, len(time.RFC3339Nano)+2)
+	b = append(b, '"')
+	b = t.AppendFormat(b, time.RFC3339Nano)
+	b = append(b, '"')
+	return b, nil
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// The time is expected to be a quoted string in RFC 3339 format.
+func (t *customTime) UnmarshalJSON(data []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(data) == "null" {
+		return nil
+	}
+
+	adjust := false
+	if bytes.Index(data, []byte("Z")) == -1 {
+		// TODO get correct time offset
+		data = append(data[:len(data)-1], []byte("Z\"")...)
+		adjust = true
+	}
+
+	// Fractional seconds are handled implicitly by Parse.
+	var err error
+	t.Time, err = time.Parse(`"`+time.RFC3339+`"`, string(data))
+
+	if adjust {
+		t := time.Now()
+		_, offset := t.Zone()
+		t.Add(time.Duration(offset) * time.Second)
+		// TODO might not be the right thing always if deconz is not running on the same server
+	}
+	return err
+}
 
 type configResponse struct {
 	WebsocketPort int    `json:"websocketport"`
@@ -76,13 +124,13 @@ type group struct {
 }
 
 type sensorState struct {
-	ButtonEvent *int       `json:"buttonevent"`
-	LastUpdated *time.Time `json:"lastupdated"`
-	Dark        *bool      `json:"dark"`
-	Daylight    *bool      `json:"daylight"`
-	LightLevel  *int       `json:"lightlevel"`
-	Lux         *int       `json:"lux"`
-	Presence    *bool      `json:"presence"`
+	ButtonEvent *int        `json:"buttonevent"`
+	LastUpdated *customTime `json:"lastupdated"`
+	Dark        *bool       `json:"dark"`
+	Daylight    *bool       `json:"daylight"`
+	LightLevel  *int        `json:"lightlevel"`
+	Lux         *int        `json:"lux"`
+	Presence    *bool       `json:"presence"`
 }
 
 type sensor struct {

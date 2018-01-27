@@ -1,14 +1,14 @@
+servers = ["tcp://localhost:1883"]
+
 bridge {
     root = "haaga"
-    servers = ["tcp://localhost:1883"]
 
-    /*
     adapter "deconz" {
         type = "deconz"
         config {
             hostname = "10.0.1.22"
             port = 80
-            key = "5D7E8C715E"
+            key = "624F099FA9"
         }
     }
 
@@ -25,7 +25,7 @@ bridge {
             mac = "48:A9:D2:53:DC:10"
         }
     }
-    */
+    
 
     adapter "db" {
         type = "bolt"

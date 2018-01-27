@@ -1,8 +1,6 @@
 package deconz
 
 import (
-	"fmt"
-
 	"github.com/orktes/homeautomation/bridge/adapter"
 )
 
@@ -135,17 +133,24 @@ func (sd *sensorDevice) Get(id string) (interface{}, error) {
 	if id == "name" {
 		return sd.data.Name, nil
 	}
-	return getStructValueByName(sd.data.State, id), nil
+
+	val := getStructValueByName(sd.data.State, id)
+	res := map[string]interface{}{
+		"value":   val,
+		"updated": sd.data.State.LastUpdated,
+	}
+
+	return res, nil
 }
 
 func (sd *sensorDevice) GetAll() (map[string]interface{}, error) {
 	all := getAllFromStruct(sd.data.State, sd)
 	all["name"] = sd.data.Name
+	delete(all, "lastupdated")
 	return all, nil
 }
 
 func (sd *sensorDevice) Set(id string, val interface{}) error {
-	fmt.Printf("Set sensor %s %+d\n", id, val)
 	return nil
 }
 
@@ -154,7 +159,18 @@ func (sd *sensorDevice) updateState(state *sensorState) {
 	du := adapter.Update{}
 	du.ValueContainer = sd
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: sd.ID() + "/" + kp.key, Value: kp.val})
+		if kp.key == "lastupdated" {
+			// NO reason to re-send lastupdated
+			continue
+		}
+
+		du.Updates = append(du.Updates, adapter.ValueUpdate{
+			Key: sd.ID() + "/" + kp.key,
+			Value: map[string]interface{}{
+				"updated": sd.data.State.LastUpdated,
+				"value":   kp.val,
+			},
+		})
 	}
 
 	for _, ch := range sd.updateChannels {
