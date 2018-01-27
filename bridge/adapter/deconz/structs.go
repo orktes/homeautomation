@@ -1,6 +1,9 @@
 package deconz
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type configResponse struct {
 	WebsocketPort int    `json:"websocketport"`
@@ -73,12 +76,13 @@ type group struct {
 }
 
 type sensorState struct {
-	ButtonEvent *int  `json:"buttonevent"`
-	Dark        *bool `json:"dark"`
-	Daylight    *bool `json:"daylight"`
-	LightLevel  *int  `json:"lightlevel"`
-	Lux         *int  `json:"lux"`
-	Presence    *bool `json:"presence"`
+	ButtonEvent *int       `json:"buttonevent"`
+	LastUpdated *time.Time `json:"lastupdated"`
+	Dark        *bool      `json:"dark"`
+	Daylight    *bool      `json:"daylight"`
+	LightLevel  *int       `json:"lightlevel"`
+	Lux         *int       `json:"lux"`
+	Presence    *bool      `json:"presence"`
 }
 
 type sensor struct {
