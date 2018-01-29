@@ -1,5 +1,25 @@
-servers = ["tcp://localhost:1883"]
+# Templates
 
+{{define "alexa_deconz_lightgroup"}}
+device "{{slugify (index . 0)}}" {
+    name = "{{index . 0}}"
+    description = "{{index . 0}} group"
+
+    display_categories = ["SWITCH"]
+
+    capability "PowerController" {
+        property "powerState" {
+            get = "get('haaga/deconz/groups/{{index . 1}}/any_on') ? 'ON' : 'OFF'"
+            set = "set('haaga/deconz/groups/{{index . 1}}/on', value === 'ON')"
+        }
+    }
+}
+{{end}}
+
+
+# Actual config 
+
+servers = ["tcp://localhost:1883"]
 
 bridge {
     root = "haaga"
@@ -51,61 +71,10 @@ trigger {
 alexa {
     topic = "haaga/aws/lambda/homeautomation"
 
-    device "all_light" {
-        name = "All lights"
-        description = "All lights in the appartment"
-
-        display_categories = ["SWITCH"]
-
-        capability "PowerController" {
-            property "powerState" {
-                get = "get('haaga/deconz/groups/3/any_on') ? 'ON' : 'OFF'"
-                set = "set('haaga/deconz/groups/3/on', value === 'ON')"
-            }
-        }
-    }
-
-    device "bedroom_light" {
-        name = "Bedroom lights"
-        description = "Bedroom lights"
-
-        display_categories = ["SWITCH"]
-
-        capability "PowerController" {
-            property "powerState" {
-                get = "get('haaga/deconz/groups/4/any_on') ? 'ON' : 'OFF'"
-                set = "set('haaga/deconz/groups/4/on', value === 'ON')"
-            }
-        }
-    }
-
-    device "kitchen_light" {
-        name = "Kitchen lights"
-        description = "Kitchen lights"
-
-        display_categories = ["SWITCH"]
-
-        capability "PowerController" {
-            property "powerState" {
-                get = "get('haaga/deconz/groups/2/any_on') ? 'ON' : 'OFF'"
-                set = "set('haaga/deconz/groups/2/on', value === 'ON')"
-            }
-        }
-    }
-
-    device "livingroom_light" {
-        name = "Living room lights"
-        description = "Living room lights"
-
-        display_categories = ["SWITCH"]
-
-        capability "PowerController" {
-            property "powerState" {
-                get = "get('haaga/deconz/groups/1/any_on') ? 'ON' : 'OFF'"
-                set = "set('haaga/deconz/groups/1/on', value === 'ON')"
-            }
-        }
-    }
+    {{template "alexa_deconz_lightgroup" array "All lights" 3 }}
+    {{template "alexa_deconz_lightgroup" array "Bedroom lights" 4 }}
+    {{template "alexa_deconz_lightgroup" array "Kitchen lights" 2 }}
+    {{template "alexa_deconz_lightgroup" array "Living room lights" 1 }}
 
     device "livingroom_amp" {
         name = "Amplifier"

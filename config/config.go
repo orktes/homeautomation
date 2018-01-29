@@ -1,9 +1,14 @@
 package config
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
+	"strings"
 
+	"text/template"
+
+	"github.com/gosimple/slug"
 	"github.com/hashicorp/hcl"
 )
 
@@ -73,8 +78,26 @@ func ParseConfig(reader io.Reader) (Config, error) {
 		return Config{}, err
 	}
 
+	tmpl, err := template.New("config").Funcs(map[string]interface{}{
+		"toLower": strings.ToLower,
+		"toUpper": strings.ToUpper,
+		"slugify": slug.Make,
+		"array": func(vals ...interface{}) []interface{} {
+			return vals
+		},
+	}).Parse(string(data))
+	if err != nil {
+		return Config{}, err
+	}
+
+	b := &bytes.Buffer{}
+
+	if err := tmpl.Execute(b, map[string]interface{}{}); err != nil {
+		return Config{}, err
+	}
+
 	conf := &Config{}
-	err = hcl.Decode(conf, string(data))
+	err = hcl.Decode(conf, string(b.Bytes()))
 
 	return *conf, err
 }
