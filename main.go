@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/orktes/homeautomation/alexa"
 	"github.com/orktes/homeautomation/bridge/adapter"
 	"github.com/orktes/homeautomation/trigger"
 
@@ -112,6 +113,28 @@ func configureTriggerSystem(conf config.Config) func() error {
 	}
 }
 
+func configureAlexa(conf config.Config) func() error {
+	if conf.Alexa == nil {
+		return NoopCloser
+	}
+
+	a := alexa.New(conf)
+	if err := a.Connect(); err != nil {
+		fmt.Printf("Error connecting to mqtt brokers %s\n", err.Error())
+		os.Exit(1)
+		return NoopCloser
+	}
+
+	return func() error {
+		if err := a.Disconnect(0); err != nil {
+			fmt.Printf("Error disconnecting from mqtt brokers %s\n", err.Error())
+			return err
+		}
+
+		return nil
+	}
+}
+
 func main() {
 	file, err := os.Open(os.Args[1])
 	if err != nil {
@@ -125,6 +148,7 @@ func main() {
 
 	closeBridge := configureBridge(conf)
 	closeTriggerSystem := configureTriggerSystem(conf)
+	closeAlexa := configureAlexa(conf)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -133,5 +157,6 @@ func main() {
 
 	closeBridge()
 	closeTriggerSystem()
+	closeAlexa()
 
 }

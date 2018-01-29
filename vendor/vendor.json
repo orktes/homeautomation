@@ -9,6 +9,42 @@
 			"revisionTime": "2017-11-20T01:03:07Z"
 		},
 		{
+			"checksumSHA1": "6y/Ht8J58EotTDBEIuE3+s4AnL8=",
+			"path": "github.com/dlclark/regexp2",
+			"revision": "7632a260cbaf5e7594fc1544a503456ecd0827f1",
+			"revisionTime": "2017-10-09T02:06:23Z"
+		},
+		{
+			"checksumSHA1": "k0JXX65FspyueQ8/1i50DGRiCUk=",
+			"path": "github.com/dlclark/regexp2/syntax",
+			"revision": "7632a260cbaf5e7594fc1544a503456ecd0827f1",
+			"revisionTime": "2017-10-09T02:06:23Z"
+		},
+		{
+			"checksumSHA1": "L8OPNVab18Tmt/7ssTF6CjeyLlw=",
+			"path": "github.com/dop251/goja/ast",
+			"revision": "eab79f83e840f5294250a3988a8037c476c9cdae",
+			"revisionTime": "2018-01-13T12:29:55Z"
+		},
+		{
+			"checksumSHA1": "YC5Zv9wxNXg5keMD1TaT1bxi7RM=",
+			"path": "github.com/dop251/goja/file",
+			"revision": "eab79f83e840f5294250a3988a8037c476c9cdae",
+			"revisionTime": "2018-01-13T12:29:55Z"
+		},
+		{
+			"checksumSHA1": "prpWoQvuBmUHUPhR6Fw999FmC00=",
+			"path": "github.com/dop251/goja/parser",
+			"revision": "eab79f83e840f5294250a3988a8037c476c9cdae",
+			"revisionTime": "2018-01-13T12:29:55Z"
+		},
+		{
+			"checksumSHA1": "e5dVrjv6qkrLCwv6C849Em3a35I=",
+			"path": "github.com/dop251/goja/token",
+			"revision": "eab79f83e840f5294250a3988a8037c476c9cdae",
+			"revisionTime": "2018-01-13T12:29:55Z"
+		},
+		{
 			"checksumSHA1": "t54h2PELlQvbf0+eE0ZVZVr6UtY=",
 			"path": "github.com/eclipse/paho.mqtt.golang",
 			"revision": "bab87cde322cf9aec420645d1e9801d0f216f791",
@@ -19,6 +55,12 @@
 			"path": "github.com/eclipse/paho.mqtt.golang/packets",
 			"revision": "bab87cde322cf9aec420645d1e9801d0f216f791",
 			"revisionTime": "2018-01-19T12:21:19Z"
+		},
+		{
+			"checksumSHA1": "uFNLkTxk8BkHTk0Jcub2lj2BX4M=",
+			"path": "github.com/google/uuid",
+			"revision": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+			"revisionTime": "2017-11-29T19:10:14Z"
 		},
 		{
 			"checksumSHA1": "hEnH6sgR83Qfx7UNnphNNlelmj0=",
@@ -117,6 +159,24 @@
 			"revisionTime": "2018-01-12T20:22:55Z"
 		},
 		{
+			"checksumSHA1": "ErQSfNwzpSgWUH0QoDA7iYBlnes=",
+			"path": "github.com/orktes/go-lambda-mqtt",
+			"revision": "931bf482b0eb5826d6a2325a83ad65d88cb652a6",
+			"revisionTime": "2018-01-28T13:25:49Z"
+		},
+		{
+			"checksumSHA1": "7hJwKKxp3YOPXY27trBerqtOCjo=",
+			"path": "github.com/orktes/go-lambda-mqtt/structs",
+			"revision": "931bf482b0eb5826d6a2325a83ad65d88cb652a6",
+			"revisionTime": "2018-01-28T13:25:49Z"
+		},
+		{
+			"checksumSHA1": "lUHqni/XneRY7qJ3ZEBqZvPGuQc=",
+			"path": "github.com/orktes/goja",
+			"revision": "de745b3ac56f1d1a9b8f7e74eb86c6b1a46624e5",
+			"revisionTime": "2018-01-13T17:05:33Z"
+		},
+		{
 			"checksumSHA1": "8MZHn5QeacbNY2w32mXMlcxz0ZE=",
 			"path": "github.com/sabhiram/go-wol",
 			"revision": "dfbff1fb80e2a494b89421ba94fa13a58b2070fa",
@@ -157,6 +217,18 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "810d7000345868fc619eb81f46307107118f4ae1",
 			"revisionTime": "2018-01-09T14:25:55Z"
+		},
+		{
+			"checksumSHA1": "O/wbuH8Lr2At3en/DY4xuCUmV3g=",
+			"path": "golang.org/x/text/cases",
+			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
+			"revisionTime": "2017-12-24T20:31:28Z"
+		},
+		{
+			"checksumSHA1": "5AKasas4CO8g/Wiizgd34EGLoMQ=",
+			"path": "golang.org/x/text/collate",
+			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
+			"revisionTime": "2017-12-24T20:31:28Z"
 		},
 		{
 			"checksumSHA1": "Mr4ur60bgQJnQFfJY0dGtwWwMPE=",
@@ -219,6 +291,18 @@
 			"revisionTime": "2017-12-24T20:31:28Z"
 		},
 		{
+			"checksumSHA1": "hnQHiWQxHusGFlWpz+1rRbRwYmI=",
+			"path": "golang.org/x/text/internal",
+			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
+			"revisionTime": "2017-12-24T20:31:28Z"
+		},
+		{
+			"checksumSHA1": "45fiqnr0oU2bicWWAWz0lGWg4eU=",
+			"path": "golang.org/x/text/internal/colltab",
+			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
+			"revisionTime": "2017-12-24T20:31:28Z"
+		},
+		{
 			"checksumSHA1": "hyNCcTwMQnV6/MK8uUW9E5H0J0M=",
 			"path": "golang.org/x/text/internal/tag",
 			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
@@ -245,6 +329,12 @@
 		{
 			"checksumSHA1": "ziMb9+ANGRJSSIuxYdRbA+cDRBQ=",
 			"path": "golang.org/x/text/transform",
+			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
+			"revisionTime": "2017-12-24T20:31:28Z"
+		},
+		{
+			"checksumSHA1": "lN2xlA6Utu7tXy2iUoMF2+y9EUE=",
+			"path": "golang.org/x/text/unicode/norm",
 			"revision": "e19ae1496984b1c655b8044a65c0300a3c878dd3",
 			"revisionTime": "2017-12-24T20:31:28Z"
 		}

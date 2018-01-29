@@ -10,6 +10,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/orktes/goja"
 	"github.com/orktes/homeautomation/config"
+	"github.com/orktes/homeautomation/util"
 )
 
 type TriggerSystem struct {
@@ -79,7 +80,7 @@ func (trigger *TriggerSystem) subscribe(topic string, handler mqtt.MessageHandle
 
 	if len(trigger.subscriptions[topic]) == 0 {
 		// TODO figure out qos
-		trigger.c.Subscribe(topic, 0, nil)
+		trigger.c.Subscribe(topic, 1, nil)
 		trigger.subscriptions[topic] = map[int]mqtt.MessageHandler{}
 	}
 
@@ -146,13 +147,13 @@ func (trigger *TriggerSystem) get(r *runtime) func(call goja.FunctionCall) goja.
 		if !ok {
 			ch := make(chan struct{})
 
-			statusTopic := convertValueToTopic(key, "status")
+			statusTopic := util.ConvertValueToTopic(key, "status")
 			id := trigger.subscribe(statusTopic, func(client mqtt.Client, msg mqtt.Message) {
 				ch <- struct{}{}
 			})
 
 			// TODO figure out right qos and retain
-			trigger.c.Publish(convertValueToTopic(key, "get"), 0, false, []byte{})
+			trigger.c.Publish(util.ConvertValueToTopic(key, "get"), 0, false, []byte{})
 
 			<-ch // TODO timeout etc
 
@@ -171,7 +172,7 @@ func (trigger *TriggerSystem) set(r *runtime) func(call goja.FunctionCall) goja.
 		key := call.Argument(0).String()
 		val := call.Argument(1).Export()
 
-		topic := convertValueToTopic(key, "set")
+		topic := util.ConvertValueToTopic(key, "set")
 
 		if b, err := json.Marshal(val); err == nil {
 			if token := trigger.c.Publish(topic, 1, false, b); token.Wait() && token.Error() != nil {
@@ -234,7 +235,7 @@ func (trigger *TriggerSystem) publish(r *runtime) func(call goja.FunctionCall) g
 
 func (trigger *TriggerSystem) topic(r *runtime) func(call goja.FunctionCall) goja.Value {
 	return func(call goja.FunctionCall) goja.Value {
-		return r.ToValue(convertValueToTopic(call.Argument(0).String(), call.Argument(1).String()))
+		return r.ToValue(util.ConvertValueToTopic(call.Argument(0).String(), call.Argument(1).String()))
 	}
 
 }

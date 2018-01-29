@@ -1,8 +1,10 @@
 servers = ["tcp://localhost:1883"]
 
+
 bridge {
     root = "haaga"
 
+    /*
     adapter "deconz" {
         type = "deconz"
         config {
@@ -25,7 +27,7 @@ bridge {
             mac = "48:A9:D2:53:DC:10"
         }
     }
-    
+    */
 
     adapter "db" {
         type = "bolt"
@@ -34,8 +36,7 @@ bridge {
         }
     } 
 }
-
-
+/*
 trigger {
     script = <<SOURCE
         listen("haaga/dra/master_volume", function () {
@@ -46,4 +47,23 @@ trigger {
             print("Wildcard received", topic)
         })
     SOURCE
+}
+*/
+
+alexa {
+    topic = "haaga/aws/lambda/homeautomation"
+
+    device "1" {
+        name = "Fake switch"
+        description = "Just a fake switch"
+
+        display_categories = ["SWITCH"]
+
+        capability "PowerController" {
+            property "powerState" {
+                get = "get('haaga/db/foobar') || 'ON'"
+                set = "set('haaga/db/foobar', value)"
+            }
+        }
+    }
 }

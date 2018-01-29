@@ -25,6 +25,36 @@ type Trigger struct {
 	Script string `hcl:"script"`
 }
 
+// AlexaDeviceCapabilityProperty device property
+type AlexaDeviceCapabilityProperty struct {
+	Name string `hcl:"name,key"`
+	Get  string `hcl:"get"`
+	Set  string `hcl:"set"`
+}
+
+// AlexaDeviceCapability device capability
+type AlexaDeviceCapability struct {
+	Interface  string                          `hcl:"interface,key"`
+	Properties []AlexaDeviceCapabilityProperty `hcl:"property"`
+}
+
+// AlexaDevice alexa device config
+type AlexaDevice struct {
+	ID                string   `hcl:"id,key"`
+	Name              string   `hcl:"name"`
+	Description       string   `hcl:"description"`
+	Manafacturer      string   `hcl:"manafacturer"`
+	DisplayCategories []string `hcl:"display_categories"`
+
+	Capabilities []AlexaDeviceCapability `hcl:"capability"`
+}
+
+// Alexa mqtt config
+type Alexa struct {
+	Topic   string        `hcl:"topic"`
+	Devices []AlexaDevice `hcl:"device"`
+}
+
 // Config represents homeautomation config
 type Config struct {
 	Servers  []string      `hcl:"servers"`
@@ -33,6 +63,7 @@ type Config struct {
 	ClientID string        `hcl:"client_id"`
 	Bridge   *BridgeConfig `hcl:"bridge"`
 	Triggers []Trigger     `hcl:"trigger"`
+	Alexa    *Alexa        `hcl:"alexa"`
 }
 
 // Parse config returns a Config struct pointer parsed from a given reader
