@@ -79,9 +79,9 @@ func ParseConfig(reader io.Reader) (Config, error) {
 	}
 
 	tmpl, err := template.New("config").Funcs(map[string]interface{}{
-		"toLower": strings.ToLower,
-		"toUpper": strings.ToUpper,
-		"slugify": slug.Make,
+		"lowercase": strings.ToLower,
+		"uppercase": strings.ToUpper,
+		"slugify":   slug.Make,
 		"array": func(vals ...interface{}) []interface{} {
 			return vals
 		},
