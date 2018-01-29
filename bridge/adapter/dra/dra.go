@@ -113,6 +113,8 @@ func (dra *DRA) Set(id string, val interface{}) error {
 			return dra.DRA.SetMasterVolume(val)
 		case int64:
 			return dra.DRA.SetMasterVolume(int(val))
+		case float64:
+			return dra.DRA.SetMasterVolume(int(val))
 		case string:
 			if val == "UP" {
 				return dra.DRA.Send("MVUP")

@@ -86,7 +86,7 @@ func (vt *VieraTV) setVolume(val int) error {
 			ValueContainer: vt,
 			Updates: []adapter.ValueUpdate{
 				adapter.ValueUpdate{
-					Key:   vt.id + ".volume",
+					Key:   vt.id + "/volume",
 					Value: val,
 				},
 			},
@@ -105,14 +105,14 @@ func (vt *VieraTV) setMute(val bool) error {
 		intVal = 1
 	}
 
-	_, err := vt.sendCMD("render", "SetVolume", fmt.Sprintf("<InstanceID>0</InstanceID><Channel>Master</Channel><DesiredMute>%d</DesiredMute>", intVal))
+	_, err := vt.sendCMD("render", "SetMute", fmt.Sprintf("<InstanceID>0</InstanceID><Channel>Master</Channel><DesiredMute>%d</DesiredMute>", intVal))
 	if val != vt.mute {
 		vt.mute = val
 		vt.SendUpdate(adapter.Update{
 			ValueContainer: vt,
 			Updates: []adapter.ValueUpdate{
 				adapter.ValueUpdate{
-					Key:   vt.id + ".mute",
+					Key:   vt.id + "/mute",
 					Value: val,
 				},
 			},
@@ -143,7 +143,7 @@ func (vt *VieraTV) setPower(power bool) error {
 		ValueContainer: vt,
 		Updates: []adapter.ValueUpdate{
 			adapter.ValueUpdate{
-				Key:   vt.id + ".power",
+				Key:   vt.id + "/power",
 				Value: power,
 			},
 		},

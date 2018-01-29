@@ -12,3 +12,25 @@ func ConvertValueToTopic(str string, typ string) string {
 
 	return strings.Join(fullTopic, "/")
 }
+
+func ConvertFloatValueToRange(inputRange, outputRange []float64, val float64) (float64, error) {
+	if len(inputRange) < 2 || len(outputRange) < 2 {
+		return val, nil
+	}
+
+	inputRangeStart := inputRange[0]
+	inputRangeEnd := inputRange[1]
+
+	outputRangeStart := outputRange[0]
+	outputRangeEnd := outputRange[1]
+
+	if inputRangeStart == outputRangeStart && inputRangeEnd == outputRangeEnd {
+		return val, nil
+	}
+
+	inputPos := (val - inputRangeStart) / (inputRangeEnd - inputRangeStart)
+
+	outputRangeDelta := outputRangeEnd - outputRangeStart
+
+	return outputRangeStart + (inputPos * outputRangeDelta), nil
+}

@@ -96,7 +96,25 @@ func (gd *groupDevice) Set(id string, val interface{}) error {
 	stateUpdate[id] = val
 
 	res := &lightStateChangeResponse{}
-	return gd.deconz.put("/groups/"+gd.id+"/action", stateUpdate, res)
+	err := gd.deconz.put("/groups/"+gd.id+"/action", stateUpdate, res)
+
+	if err == nil {
+		// Groups are slow to update state in deconz. So lets fake it a little bit
+		du := adapter.Update{}
+		du.ValueContainer = gd
+		du.Updates = []adapter.ValueUpdate{
+			{
+				Key:   gd.ID() + "/" + id,
+				Value: val,
+			},
+		}
+
+		for _, ch := range gd.updateChannels {
+			ch <- du
+		}
+	}
+
+	return err
 }
 
 func (gd *groupDevice) updateState(state *groupState) {

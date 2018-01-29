@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -32,9 +33,12 @@ type Trigger struct {
 
 // AlexaDeviceCapabilityProperty device property
 type AlexaDeviceCapabilityProperty struct {
-	Name string `hcl:"name,key"`
-	Get  string `hcl:"get"`
-	Set  string `hcl:"set"`
+	Name        string    `hcl:"name,key"`
+	Type        string    `hcl:"type"`
+	InputRange  []float64 `hcl:"input_range"`
+	OutputRange []float64 `hcl:"output_range"`
+	Get         string    `hcl:"get"`
+	Set         string    `hcl:"set"`
 }
 
 // AlexaDeviceCapability device capability
@@ -95,6 +99,8 @@ func ParseConfig(reader io.Reader) (Config, error) {
 	if err := tmpl.Execute(b, map[string]interface{}{}); err != nil {
 		return Config{}, err
 	}
+
+	fmt.Printf("Using config\n%s\n", string(b.Bytes()))
 
 	conf := &Config{}
 	err = hcl.Decode(conf, string(b.Bytes()))
