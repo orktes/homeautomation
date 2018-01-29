@@ -129,7 +129,7 @@ func (deconz *Deconz) UpdateChannel() <-chan adapter.Update {
 func (deconz *Deconz) init() {
 	deconz.register()
 	deconz.setupWSConnection()
-	deconz.fetchInitialState()
+	go deconz.fetchInitialState()
 
 }
 
@@ -227,7 +227,7 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 		if ev.Event == "changed" {
 			device, err := deconz.Get(ev.Route + "/" + ev.ID)
 			if err != nil {
-				fmt.Printf("Error occured while updating device with event event: %s", err.Error())
+				fmt.Printf("Error occured while updating device with event event: %s\n", err.Error())
 				continue
 			}
 
@@ -235,15 +235,15 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 			case *lightDevice:
 				s := &lightState{}
 				ev.unmarshalState(s)
-				go d.updateState(s)
+				go d.updateState(s, true)
 			case *groupDevice:
 				s := &groupState{}
 				ev.unmarshalState(s)
-				go d.updateState(s)
+				go d.updateState(s, true)
 			case *sensorDevice:
 				s := &sensorState{}
 				ev.unmarshalState(s)
-				go d.updateState(s)
+				go d.updateState(s, true)
 			}
 
 		}
@@ -251,20 +251,28 @@ func (deconz *Deconz) initWebsocketConnection(host string, port int) {
 }
 
 func (deconz *Deconz) fetchInitialState() {
+fetch:
 	err := deconz.getLights()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while fetching sensors states %s\n", err)
 	}
 
 	err = deconz.getGroups()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while fetching sensors states %s\n", err)
 	}
 
 	err = deconz.getSensors()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while fetching sensors states %s\n", err)
 	}
+
+	// Refetch initial state
+	fmt.Printf("Refetching in 5 minuted")
+	time.Sleep(5 * time.Minute)
+	fmt.Print("Refetching deconz state\n")
+	goto fetch
+
 }
 
 func (deconz *Deconz) getLights() error {
@@ -275,8 +283,15 @@ func (deconz *Deconz) getLights() error {
 
 	deconz.Lock()
 	defer deconz.Unlock()
-	for id, light := range lights {
-		ld := &lightDevice{id: id, deconz: deconz, data: light}
+	for id, lightData := range lights {
+		if d, ok := deconz.lights[id]; ok {
+			go func(l light, d *lightDevice) {
+				d.updateState(&l.State, false)
+			}(lightData, d)
+			continue
+		}
+
+		ld := &lightDevice{id: id, deconz: deconz, data: lightData}
 		deconz.pipeUpdates(ld)
 		deconz.lights[id] = ld
 	}
@@ -291,8 +306,15 @@ func (deconz *Deconz) getGroups() error {
 
 	deconz.Lock()
 	defer deconz.Unlock()
-	for id, group := range groups {
-		gd := &groupDevice{id: id, deconz: deconz, data: group}
+	for id, groupData := range groups {
+		if d, ok := deconz.groups[id]; ok {
+			go func(g group, d *groupDevice) {
+				d.updateState(&g.State, false)
+			}(groupData, d)
+			continue
+		}
+
+		gd := &groupDevice{id: id, deconz: deconz, data: groupData}
 		deconz.pipeUpdates(gd)
 		deconz.groups[id] = gd
 	}
@@ -307,8 +329,15 @@ func (deconz *Deconz) getSensors() error {
 
 	deconz.Lock()
 	defer deconz.Unlock()
-	for id, sensor := range sensors {
-		sd := &sensorDevice{id: id, deconz: deconz, data: sensor}
+	for id, sensorData := range sensors {
+		if d, ok := deconz.sensors[id]; ok {
+			go func(s sensor, d *sensorDevice) {
+				d.updateState(&s.State, false)
+			}(sensorData, d)
+			continue
+		}
+
+		sd := &sensorDevice{id: id, deconz: deconz, data: sensorData}
 		deconz.pipeUpdates(sd)
 		deconz.sensors[id] = sd
 	}

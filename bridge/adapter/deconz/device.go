@@ -42,12 +42,14 @@ func (ld *lightDevice) Set(id string, val interface{}) error {
 	return ld.deconz.put("/lights/"+ld.id+"/state", stateUpdate, res)
 }
 
-func (ld *lightDevice) updateState(state *lightState) {
+func (ld *lightDevice) updateState(state *lightState, sendUnchanged bool) {
 	keys := mergeStructs(&ld.data.State, state)
 	du := adapter.Update{}
 	du.ValueContainer = ld
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: ld.ID() + "/" + kp.key, Value: kp.val})
+		if sendUnchanged || kp.changed {
+			du.Updates = append(du.Updates, adapter.ValueUpdate{Key: ld.ID() + "/" + kp.key, Value: kp.val})
+		}
 	}
 
 	for _, ch := range ld.updateChannels {
@@ -117,12 +119,14 @@ func (gd *groupDevice) Set(id string, val interface{}) error {
 	return err
 }
 
-func (gd *groupDevice) updateState(state *groupState) {
+func (gd *groupDevice) updateState(state *groupState, sendUnchanged bool) {
 	keys := mergeStructs(&gd.data.State, state)
 	du := adapter.Update{}
 	du.ValueContainer = gd
 	for _, kp := range keys {
-		du.Updates = append(du.Updates, adapter.ValueUpdate{Key: gd.ID() + "/" + kp.key, Value: kp.val})
+		if sendUnchanged || kp.changed {
+			du.Updates = append(du.Updates, adapter.ValueUpdate{Key: gd.ID() + "/" + kp.key, Value: kp.val})
+		}
 	}
 
 	for _, ch := range gd.updateChannels {
@@ -172,7 +176,7 @@ func (sd *sensorDevice) Set(id string, val interface{}) error {
 	return nil
 }
 
-func (sd *sensorDevice) updateState(state *sensorState) {
+func (sd *sensorDevice) updateState(state *sensorState, sendUnchanged bool) {
 	keys := mergeStructs(&sd.data.State, state)
 	du := adapter.Update{}
 	du.ValueContainer = sd
@@ -182,13 +186,15 @@ func (sd *sensorDevice) updateState(state *sensorState) {
 			continue
 		}
 
-		du.Updates = append(du.Updates, adapter.ValueUpdate{
-			Key: sd.ID() + "/" + kp.key,
-			Value: map[string]interface{}{
-				"updated": sd.data.State.LastUpdated,
-				"value":   kp.val,
-			},
-		})
+		if sendUnchanged || kp.changed {
+			du.Updates = append(du.Updates, adapter.ValueUpdate{
+				Key: sd.ID() + "/" + kp.key,
+				Value: map[string]interface{}{
+					"updated": sd.data.State.LastUpdated,
+					"value":   kp.val,
+				},
+			})
+		}
 	}
 
 	for _, ch := range sd.updateChannels {

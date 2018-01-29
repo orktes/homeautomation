@@ -7,8 +7,9 @@ import (
 )
 
 type updatedKey struct {
-	key string
-	val interface{}
+	key     string
+	val     interface{}
+	changed bool
 }
 
 func getAllFromStruct(a interface{}, vc adapter.ValueContainer) map[string]interface{} {
@@ -71,6 +72,7 @@ func mergeStructs(a interface{}, b interface{}) []updatedKey {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		valueField := v.Field(i)
+		targetValueField := aV.Field(i)
 		if !valueField.IsNil() {
 			var val interface{}
 			if valueField.Kind() == reflect.Ptr {
@@ -78,16 +80,28 @@ func mergeStructs(a interface{}, b interface{}) []updatedKey {
 			} else {
 				val = valueField.Interface()
 			}
-			keys = append(keys, updatedKey{
-				key: field.Tag.Get("json"),
-				val: val,
-			})
 
+			targetIsNil := targetValueField.IsNil()
+			changed := targetIsNil
 			if v.Field(i).Kind() == reflect.Ptr {
 				aV.Field(i).Elem().Set(v.Field(i).Elem())
+
+				if targetIsNil {
+					changed = targetValueField.Elem().Interface() != val
+				}
 			} else {
 				aV.Field(1).Set(v.Field(1))
+
+				if targetIsNil {
+					changed = targetValueField.Interface() != val
+				}
 			}
+
+			keys = append(keys, updatedKey{
+				key:     field.Tag.Get("json"),
+				val:     val,
+				changed: changed,
+			})
 		}
 	}
 
