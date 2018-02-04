@@ -76,6 +76,49 @@ alexa {
                 set = "set('haaga/deconz/groups/{{index . 1}}/bri', value)"
             }
         }
+
+        capability "ColorTemperatureController" {
+            property "colorTemperatureInKelvin" {
+                type = "int"
+                input_range = [1000, 10000]
+                output_range = [152, 353]
+
+                get = "get('haaga/deconz/groups/{{index . 1}}/ct')"
+                set = "set('haaga/deconz/groups/{{index . 1}}/ct', value)"
+            }
+
+            action "DecreaseColorTemperature" {
+                type = "int"
+                input_range = [1000, 10000]
+                output_range = [152, 353]
+
+                script = <<SOURCE
+                    (function () {
+                        var ct = get('haaga/deconz/groups/{{index . 1}}/ct');
+                        ct += 100;
+                        ct = Math.min(ct, 353)
+                        set('haaga/deconz/groups/{{index . 1}}/ct', ct);
+                        return ct;
+                    })();
+                SOURCE
+            }
+
+            action "IncreaseColorTemperature" {
+                type = "int"
+                input_range = [1000, 10000]
+                output_range = [152, 353]
+
+                script = <<SOURCE
+                    (function () {
+                        var ct = get('haaga/deconz/groups/{{index . 1}}/ct');
+                        ct -= 100;
+                        ct = Math.max(ct, 152)
+                        set('haaga/deconz/groups/{{index . 1}}/ct', ct);
+                        return ct;
+                    })();
+                SOURCE
+            }
+        }
     }
     {{end}}
 

@@ -3,6 +3,7 @@ package alexa
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 
@@ -69,6 +70,10 @@ func New(conf config.Config) *Alexa {
 			for _, conf := range capabilityConfig.Properties {
 				capability.AddPropertyHandler(conf.Name, a.getMQTTPropertyHandler(conf))
 			}
+
+			for _, conf := range capabilityConfig.Actions {
+				capability.AddAction(conf.Name, a.getMQTTActionHandler(conf))
+			}
 		}
 
 		sm.AddDevice(dev)
@@ -103,6 +108,35 @@ func (a *Alexa) exec(str string, context map[string]interface{}) (val goja.Value
 
 func (a *Alexa) getMQTTPropertyHandler(conf config.AlexaDeviceCapabilityProperty) smarthome.PropertyHandler {
 	return &propertyHandler{alexa: a, conf: conf}
+}
+
+func (a *Alexa) getMQTTActionHandler(conf config.AlexaDeviceCapabilityAction) func(interface{}) (interface{}, error) {
+	return func(arg interface{}) (interface{}, error) {
+		script := conf.Script
+		gval, err := a.exec(script, map[string]interface{}{"value": arg})
+		if err != nil {
+			return nil, err
+		}
+
+		val := gval.Export()
+
+		switch v := val.(type) {
+		case int64:
+			val = float64(v)
+		case int:
+			val = float64(v)
+		}
+		if v, ok := val.(float64); ok {
+			if rangeVal, err := util.ConvertFloatValueToRange(conf.OutputRange, conf.InputRange, v); err == nil {
+				val = rangeVal
+				if conf.Type == "int" {
+					val = int(rangeVal + math.Copysign(0.5, rangeVal))
+				}
+			}
+		}
+
+		return val, nil
+	}
 }
 
 func (a *Alexa) auth(req smarthome.AcceptGrantRequest) error {

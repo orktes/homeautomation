@@ -41,10 +41,20 @@ type AlexaDeviceCapabilityProperty struct {
 	Set         string    `hcl:"set"`
 }
 
+// AlexaDeviceCapabilityAction device action
+type AlexaDeviceCapabilityAction struct {
+	Name        string    `hcl:"name,key"`
+	Type        string    `hcl:"type"`
+	InputRange  []float64 `hcl:"input_range"`
+	OutputRange []float64 `hcl:"output_range"`
+	Script      string    `hcl:"script"`
+}
+
 // AlexaDeviceCapability device capability
 type AlexaDeviceCapability struct {
 	Interface  string                          `hcl:"interface,key"`
 	Properties []AlexaDeviceCapabilityProperty `hcl:"property"`
+	Actions    []AlexaDeviceCapabilityAction   `hcl:"action"`
 }
 
 // AlexaDevice alexa device config
