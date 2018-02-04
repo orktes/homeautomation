@@ -32,5 +32,11 @@ func ConvertFloatValueToRange(inputRange, outputRange []float64, val float64) (f
 
 	outputRangeDelta := outputRangeEnd - outputRangeStart
 
+	if inputPos < 0 {
+		inputPos = 0
+	} else if inputPos > 1 {
+		inputPos = 1
+	}
+
 	return outputRangeStart + (inputPos * outputRangeDelta), nil
 }

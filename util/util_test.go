@@ -13,11 +13,13 @@ func TestConvertFloatValueToRange(t *testing.T) {
 	testData := []rangeTestData{
 		{[]float64{0, 0}, []float64{0, 0}, 0, 0},
 		{[]float64{0, 100}, []float64{100, 0}, 0, 100},
+		{[]float64{0, 100}, []float64{100, 0}, -10, 100},
 		{[]float64{100, 0}, []float64{100, 0}, 0, 0},
 		{[]float64{0, 50}, []float64{0, 100}, 50, 100},
 		{[]float64{0, 100}, []float64{0, 50}, 100, 50},
 		{[]float64{0, 100}, []float64{-90, 0}, 100, 0},
 		{[]float64{0, 100}, []float64{-90, 0}, 50, -45},
+		{[]float64{0, 100}, []float64{-90, 0}, -50, -90},
 	}
 
 	for _, test := range testData {
