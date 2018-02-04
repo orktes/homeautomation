@@ -270,7 +270,7 @@ fetch:
 	// Refetch initial state
 	fmt.Println("Refetching in 5 minutes")
 	time.Sleep(5 * time.Minute)
-	fmt.Print("Refetching deconz state\n")
+	fmt.Println("Refetching deconz state")
 	goto fetch
 
 }
