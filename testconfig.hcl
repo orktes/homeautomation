@@ -51,6 +51,35 @@ trigger {
 
 alexa {
     topic = "haaga/aws/lambda/homeautomation"
+    {{ define "speaker_capability" }}
+    capability "Speaker" {
+        property "mute" {
+            get = "get('{{index . 0}}')"
+            set = "set('{{index . 0}}', value)"
+        }
+
+        property "volume" {
+            type = "int"
+            input_range = [0, 100]
+            output_range = [{{index . 2}}, {{index . 3}}]
+
+            get = "get('{{index . 1}}')"
+            set = "set('{{index . 1}}', value)"
+        } 
+    }
+
+    capability "PercentageController" {
+        property "percentage" {
+            type = "int"
+            input_range = [0, 100]
+            output_range = [{{index . 2}}, {{index . 3}}]
+
+            get = "get('{{index . 1}}')"
+            set = "set('{{index . 1}}', value)"
+        } 
+    }
+    {{end}}
+
     {{ define "temperature_ranges" }}
         type = "int"
         input_range = [1000, 10000]
@@ -134,21 +163,8 @@ alexa {
 
         display_categories = ["SPEAKER"]
 
-        capability "Speaker" {
-            property "mute" {
-                get = "get('haaga/dra/mute')"
-                set = "set('haaga/dra/mute', value)"
-            }
+        {{template "speaker_capability" array "haaga/dra/mute" "haaga/dra/master_volume" 90 0 }}
 
-            property "volume" {
-                type = "int"
-                input_range = [0, 100]
-                output_range = [90, 0]
-
-                get = "get('haaga/dra/master_volume')"
-                set = "set('haaga/dra/master_volume', value)"
-            } 
-        }
 
         capability "PowerController" {
             property "powerState" {
@@ -164,21 +180,7 @@ alexa {
 
         display_categories = ["TV"]
 
-        capability "Speaker" {
-            property "mute" {
-                get = "get('haaga/tv/1/mute')"
-                set = "set('haaga/tv/1/mute', value)"
-            }
-
-            property "volume" {
-                type = "int"
-                input_range = [0, 100]
-                output_range = [0, 100]
-
-                get = "get('haaga/tv/1/volume')"
-                set = "set('haaga/tv/1/volume', value)"
-            } 
-        }
+        {{template "speaker_capability" array "haaga/tv/1/mute" "haaga/tv/1/volume" 0 100 }}
 
         capability "PowerController" {
             property "powerState" {
