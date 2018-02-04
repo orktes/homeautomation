@@ -35,19 +35,18 @@ bridge {
         }
     } 
 }
-/*
+
 trigger {
     script = <<SOURCE
-        listen("haaga/dra/master_volume", function () {
-            print("dra volume", get("haaga/dra/master_volume"), "power", get("haaga/dra/power"))
+        listen("haaga/deconz/sensors/3/buttonevent", function () {
+            var buttonEvent = get("haaga/deconz/sensors/3/buttonevent");
+            if (buttonEvent.value === 4000) {
+                set("haaga/deconz/groups/1/on", false);
+            }
         });
-
-        subscribe("haaga/#", function (topic) {
-            print("Wildcard received", topic)
-        })
     SOURCE
 }
-*/
+
 
 alexa {
     topic = "haaga/aws/lambda/homeautomation"
@@ -83,7 +82,7 @@ alexa {
     {{ define "temperature_ranges" }}
         type = "int"
         input_range = [1000, 10000]
-        output_range = [152, 353]
+        output_range = [500, 153]
     {{end}}
     {{define "alexa_deconz_lightgroup"}}
     device "{{slugify (index . 0)}}" {
