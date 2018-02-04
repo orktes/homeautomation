@@ -51,7 +51,11 @@ trigger {
 
 alexa {
     topic = "haaga/aws/lambda/homeautomation"
-
+    {{ define "temperature_ranges" }}
+        type = "int"
+        input_range = [1000, 10000]
+        output_range = [152, 353]
+    {{end}}
     {{define "alexa_deconz_lightgroup"}}
     device "{{slugify (index . 0)}}" {
         name = "{{index . 0}}"
@@ -78,24 +82,23 @@ alexa {
         }
 
         capability "ColorTemperatureController" {
+            {{ $temperatureStep := 100 }}
+            
+
             property "colorTemperatureInKelvin" {
-                type = "int"
-                input_range = [1000, 10000]
-                output_range = [152, 353]
+                {{template "temperature_ranges"}}
 
                 get = "get('haaga/deconz/groups/{{index . 1}}/ct')"
                 set = "set('haaga/deconz/groups/{{index . 1}}/ct', value)"
             }
 
             action "DecreaseColorTemperature" {
-                type = "int"
-                input_range = [1000, 10000]
-                output_range = [152, 353]
+                {{template "temperature_ranges"}}
 
                 script = <<SOURCE
                     (function () {
                         var ct = get('haaga/deconz/groups/{{index . 1}}/ct');
-                        ct += 100;
+                        ct += {{$temperatureStep}};
                         ct = Math.min(ct, 353)
                         set('haaga/deconz/groups/{{index . 1}}/ct', ct);
                         return ct;
@@ -104,14 +107,12 @@ alexa {
             }
 
             action "IncreaseColorTemperature" {
-                type = "int"
-                input_range = [1000, 10000]
-                output_range = [152, 353]
+                {{template "temperature_ranges"}}
 
                 script = <<SOURCE
                     (function () {
                         var ct = get('haaga/deconz/groups/{{index . 1}}/ct');
-                        ct -= 100;
+                        ct -= {{$temperatureStep}};
                         ct = Math.max(ct, 152)
                         set('haaga/deconz/groups/{{index . 1}}/ct', ct);
                         return ct;
