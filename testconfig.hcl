@@ -10,7 +10,7 @@ bridge {
         config {
             hostname = "10.0.1.22"
             port = 80
-            key = "624F099FA9"
+            key = "{{env "DECONZ_KEY"}}"
         }
     }
 

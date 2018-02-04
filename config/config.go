@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"text/template"
@@ -96,6 +97,7 @@ func ParseConfig(reader io.Reader) (Config, error) {
 		"lowercase": strings.ToLower,
 		"uppercase": strings.ToUpper,
 		"slugify":   slug.Make,
+		"env":       os.Getenv,
 		"array": func(vals ...interface{}) []interface{} {
 			return vals
 		},
