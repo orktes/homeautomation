@@ -155,6 +155,10 @@ func (trigger *TriggerSystem) setTimeout(r *runtime) func(call goja.FunctionCall
 		if fn, ok := goja.AssertFunction(call.Argument(0)); ok {
 			timeInMS := call.Argument(1).ToInteger()
 			timeout := time.AfterFunc(time.Duration(timeInMS)*time.Millisecond, func() {
+				trigger.timeoutMutex.Lock()
+				delete(trigger.timeouts, id)
+				trigger.timeoutMutex.Unlock()
+
 				defer func() {
 					err := recover()
 					if err != nil {
@@ -183,6 +187,7 @@ func (trigger *TriggerSystem) clearTimeout(r *runtime) func(call goja.FunctionCa
 		if ok {
 			timer.Stop()
 		}
+		delete(trigger.timeouts, int(id))
 
 		return goja.Undefined()
 	}
