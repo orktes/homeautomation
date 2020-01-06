@@ -22,6 +22,10 @@ type TriggerSystem struct {
 	subscriptions  map[string]map[int]mqtt.MessageHandler
 	data           map[string]interface{}
 
+	timeoutMutex sync.Mutex
+	timeoutID    int
+	timeouts     map[int]*time.Timer
+
 	runtimes []*runtime
 }
 
@@ -31,6 +35,7 @@ func New(conf config.Config) *TriggerSystem {
 		conf:          conf,
 		subscriptions: map[string]map[int]mqtt.MessageHandler{},
 		data:          map[string]interface{}{},
+		timeouts:      map[int]*time.Timer{},
 	}
 
 	return ts
@@ -112,6 +117,9 @@ func (trigger *TriggerSystem) getRuntime(triggerConf config.Trigger) *runtime {
 	runtime.Set("topic", trigger.topic(runtime))
 	runtime.Set("sleep", trigger.sleep(runtime))
 	runtime.Set("print", trigger.print(runtime))
+	runtime.Set("setTimeout", trigger.setTimeout(runtime))
+	runtime.Set("clearTimeout", trigger.clearTimeout(runtime))
+
 	_, err := runtime.RunString(`
 		function listen(key, cb) {
 			return subscribe(topic(key, "status"), cb);
@@ -133,6 +141,51 @@ func (trigger *TriggerSystem) getRuntime(triggerConf config.Trigger) *runtime {
 	// fmt.Printf("Eval trigger \n%s\n", triggerConf.Script)
 
 	return runtime
+}
+
+func (trigger *TriggerSystem) setTimeout(r *runtime) func(call goja.FunctionCall) goja.Value {
+
+	return func(call goja.FunctionCall) goja.Value {
+		trigger.timeoutMutex.Lock()
+		defer trigger.timeoutMutex.Unlock()
+
+		id := trigger.timeoutID
+		trigger.timeoutID++
+
+		if fn, ok := goja.AssertFunction(call.Argument(0)); ok {
+			timeInMS := call.Argument(1).ToInteger()
+			timeout := time.AfterFunc(time.Duration(timeInMS)*time.Millisecond, func() {
+				defer func() {
+					err := recover()
+					if err != nil {
+						fmt.Printf("Error: %s\n", err)
+					}
+				}()
+				fn(nil)
+			})
+
+			trigger.timeouts[id] = timeout
+		}
+
+		return r.ToValue(id)
+	}
+}
+
+func (trigger *TriggerSystem) clearTimeout(r *runtime) func(call goja.FunctionCall) goja.Value {
+
+	return func(call goja.FunctionCall) goja.Value {
+		trigger.timeoutMutex.Lock()
+		defer trigger.timeoutMutex.Unlock()
+
+		id := call.Argument(0).ToInteger()
+
+		timer, ok := trigger.timeouts[int(id)]
+		if ok {
+			timer.Stop()
+		}
+
+		return goja.Undefined()
+	}
 }
 
 func (trigger *TriggerSystem) get(r *runtime) func(call goja.FunctionCall) goja.Value {

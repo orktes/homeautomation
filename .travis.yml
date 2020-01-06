@@ -1,6 +1,6 @@
 language: go
 go:
-- 1.8
+- 1.13
 script:
 - env GOOS=linux GOARCH=arm go build -v
 - mv homeautomation homeautomation_raspberrypi
